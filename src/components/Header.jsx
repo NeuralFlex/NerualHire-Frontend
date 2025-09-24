@@ -22,6 +22,12 @@ const Header = () => {
         >
           <img src={logo} alt="Company Logo" className="h-8" />
         </div>
+        <button
+            onClick={handleLogout}
+            className="bg-white text-[#D64948] px-4 py-1.5 rounded-lg font-medium hover:bg-gray-100 transition"
+          >
+            Login
+          </button>
 
         {/* Admin Logout */}
         {isAdmin && (
