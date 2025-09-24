@@ -13,7 +13,7 @@ const JobDetail = () => {
         const data = await fetchJob(id);
         setJob(data);
       } catch (err) {
-        console.error("❌ Failed to fetch job:", err);
+        console.error("Failed to fetch job:", err);
       } finally {
         setLoading(false);
       }

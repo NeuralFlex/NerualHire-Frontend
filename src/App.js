@@ -6,7 +6,7 @@ import ApplyForm from "./components/ApplyForm";
 import AdminLogin from "./components/AdminLogin";
 import Dashboard from "./components/Dashboard"; // updated import
 import PrivateRoute from "./components/PrivateRoute";
-
+import CreateJobPage from "./components/create-job";
 
 
 
@@ -22,8 +22,8 @@ function App() {
 
           {/* Admin pages */}
           <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /> </PrivateRoute>}
-    />
+          <Route path="/dashboard" element={<PrivateRoute><Dashboard /> </PrivateRoute>}/>
+          <Route path="/create-job" element={<CreateJobPage />} />
   </Route>
       </Routes>
     </Router>

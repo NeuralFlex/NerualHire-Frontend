@@ -22,8 +22,7 @@ const AdminLogin = () => {
     // Set Axios auth header
     setAuthToken(access);
 
-    // Since only admin exists, navigate to dashboard
-    localStorage.setItem("role", "admin"); // hardcode role
+    localStorage.setItem("role", "admin");
     navigate("/dashboard");
   } catch (err) {
     console.error("Login error:", err);
