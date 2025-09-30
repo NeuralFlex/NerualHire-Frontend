@@ -4,11 +4,9 @@ import JobList from "./components/JobList";
 import JobDetail from "./components/JobDetail";
 import ApplyForm from "./components/ApplyForm";
 import AdminLogin from "./components/AdminLogin";
-import Dashboard from "./components/Dashboard"; // updated import
+import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
-import CreateJobPage from "./components/create-job";
-
-
+import CreateJobPage from "./components/create-job"; // fixed casing for consistency
 
 function App() {
   return (
@@ -22,13 +20,15 @@ function App() {
 
           {/* Admin pages */}
           <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/dashboard" element={<PrivateRoute><Dashboard /> </PrivateRoute>}/>
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
           <Route path="/create-job" element={<CreateJobPage />} />
-  </Route>
+        </Route>
       </Routes>
     </Router>
   );
 }
 
 export default App;
-

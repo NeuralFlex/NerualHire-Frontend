@@ -31,12 +31,12 @@ export default function Sidebar() {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full bg-gray-50 dark:bg-gray-900 shadow-md z-50 transition-all duration-300
+        className={`fixed top-0 left-0 h-full bg-white shadow-md z-50 transition-all duration-300
           ${isExpanded ? "w-64" : "w-16"}
           ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
         {/* Logo */}
-        <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-center h-16 border-b border-gray-300">
           <img src={logo} alt="Logo" className="h-8" />
         </div>
 
@@ -47,10 +47,11 @@ export default function Sidebar() {
               key={item.name}
               to={item.path}
               onClick={() => setActiveItem(item.name)}
-              className={`flex items-center px-4 py-3 mx-2 my-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800
-                ${activeItem === item.name || location.pathname === item.path
-                  ? "bg-gray-200 dark:bg-gray-800 font-semibold"
-                  : "text-gray-700 dark:text-gray-300"
+              className={`flex items-center px-4 py-3 mx-2 my-1 rounded-lg transition-colors
+                ${
+                  activeItem === item.name || location.pathname === item.path
+                    ? "bg-[#D64948] text-white font-semibold"
+                    : "text-gray-800 hover:bg-gray-100"
                 }`}
             >
               {isExpanded ? item.name : item.name[0]}
@@ -61,7 +62,7 @@ export default function Sidebar() {
         {/* Collapse Button */}
         <button
           onClick={toggleSidebar}
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800"
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
         >
           {isExpanded ? "<" : ">"}
         </button>
