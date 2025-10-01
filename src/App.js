@@ -6,7 +6,7 @@ import ApplyForm from "./components/ApplyForm";
 import AdminLogin from "./components/AdminLogin";
 import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
-import CreateJobPage from "./components/CreateJobPage"; // fixed casing
+import CreateJobPage from "./components/create-job"; // fixed casing
 
 function App() {
   return (
