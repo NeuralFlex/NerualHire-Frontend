@@ -1,11 +1,12 @@
+// src/components/PrivateRoute.jsx
 import React from "react";
 import { Navigate } from "react-router-dom";
 
 const PrivateRoute = ({ children }) => {
   const role = localStorage.getItem("role");
+  const token = localStorage.getItem("access");
 
-  // Only allow admin
-  if (role !== "admin") {
+  if (!token || role !== "admin") {
     return <Navigate to="/admin" replace />;
   }
 

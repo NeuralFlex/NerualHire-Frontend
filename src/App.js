@@ -6,7 +6,7 @@ import ApplyForm from "./components/ApplyForm";
 import AdminLogin from "./components/AdminLogin";
 import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
-import CreateJobPage from "./components/create-job"; // fixed casing for consistency
+import CreateJobPage from "./components/CreateJobPage"; // fixed casing
 
 function App() {
   return (
@@ -22,9 +22,20 @@ function App() {
           <Route path="/admin" element={<AdminLogin />} />
           <Route
             path="/dashboard"
-            element={<Dashboard />}
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
           />
-          <Route path="/create-job" element={<CreateJobPage />} />
+          <Route
+            path="/create-job"
+            element={
+              <PrivateRoute>
+                <CreateJobPage />
+              </PrivateRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>
