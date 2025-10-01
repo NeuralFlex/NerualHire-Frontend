@@ -15,11 +15,10 @@ const AdminLogin = () => {
       const response = await api.post("token/", { username, password });
       const { access, refresh } = response.data;
 
-      // Store tokens
       localStorage.setItem("access_token", access);
       localStorage.setItem("refresh_token", refresh);
 
-      // Set Axios auth header
+
       setAuthToken(access);
 
       localStorage.setItem("role", "admin");
