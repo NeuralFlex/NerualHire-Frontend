@@ -46,7 +46,7 @@ const AdminLogin = () => {
           <p className="text-red-500 mb-4 text-center font-medium">{error}</p>
         )}
 
-        {/* Login Form */}
+        {/* Login Forms */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">
