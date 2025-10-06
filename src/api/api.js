@@ -1,16 +1,22 @@
+// src/api/api.js
 import axios from "axios";
 
 const API = axios.create({
   baseURL: "http://127.0.0.1:8000/api/",
+  // withCredentials: true, // enable only if you use cookie auth
 });
 
-// Grab token from localStorage on page load
-const token = localStorage.getItem("access_token");
-if (token) {
-  API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-}
+// Always attach token from localStorage right before a request
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => Promise.reject(error));
 
-// Set token dynamically after login
+// Manual helper to set/remove token (use after login / logout)
 export const setAuthToken = (token) => {
   if (token) {
     localStorage.setItem("access_token", token);
@@ -21,53 +27,49 @@ export const setAuthToken = (token) => {
   }
 };
 
-// Login function
-export const login = async (email, password) => {
-  const { data } = await API.post("token/", { email, password });
-
+// Login helper (call from AdminLogin)
+export const login = async (username, password) => {
+  const { data } = await API.post("token/", { username, password });
   const { access, refresh, role } = data;
 
-  // Store tokens + role
+  // store tokens & role
   localStorage.setItem("access_token", access);
   localStorage.setItem("refresh_token", refresh);
-  localStorage.setItem("role", role);
+  localStorage.setItem("role", role ? role.toLowerCase() : "");
 
+  // set default header immediately
   API.defaults.headers.common["Authorization"] = `Bearer ${access}`;
 
   return data;
 };
 
-// Fetch user info from localStorage
+// Simple fetchUser helper
 export const fetchUser = async () => {
-  const role = localStorage.getItem("role");
-  return { role }; // can expand with more info if needed
+  const role = (localStorage.getItem("role") || "").toLowerCase();
+  return { role };
 };
 
-// Fetch jobs
+// Jobs
 export const fetchJobs = async () => {
   const { data } = await API.get("jobs/");
   return data;
 };
-
-// Fetch single job
 export const fetchJob = async (id) => {
   const { data } = await API.get(`jobs/${id}/`);
   return data;
 };
 
-// Fetch applications
+// Applications (admin)
 export const fetchApplications = async () => {
   const { data } = await API.get("applications/");
-  return data;
+  return data.results;
 };
 
-// Update application stage
 export const updateApplicationStage = async (id, stage) => {
   const { data } = await API.patch(`applications/${id}/`, { stage });
   return data;
 };
 
-// Apply for a job
 export const applyJob = async (id, formData) => {
   const { data } = await API.post(`jobs/${id}/apply/`, formData, {
     headers: { "Content-Type": "multipart/form-data" },

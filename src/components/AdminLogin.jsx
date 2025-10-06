@@ -13,15 +13,16 @@ const AdminLogin = () => {
     e.preventDefault();
     try {
       const response = await api.post("token/", { username, password });
-      const { access, refresh } = response.data;
+      const { access, refresh, role } = response.data; // ✅ include role here
 
+      // Save tokens and role
       localStorage.setItem("access_token", access);
       localStorage.setItem("refresh_token", refresh);
+      localStorage.setItem("role", role);
 
-
+      // Set auth header for Axios
       setAuthToken(access);
 
-      localStorage.setItem("role", "admin");
       navigate("/dashboard");
     } catch (err) {
       console.error("Login error:", err);
@@ -46,7 +47,7 @@ const AdminLogin = () => {
           <p className="text-red-500 mb-4 text-center font-medium">{error}</p>
         )}
 
-        {/* Login Forms */}
+        {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">

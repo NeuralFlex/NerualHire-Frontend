@@ -6,7 +6,8 @@ import ApplyForm from "./components/ApplyForm";
 import AdminLogin from "./components/AdminLogin";
 import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
-import CreateJobPage from "./components/create-job"; // fixed casing
+import CandidatesPipeline from "./components/CandidatesPipeline";
+import CreateJobPage from "./components/create-job";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<JobList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/jobs/:id/apply" element={<ApplyForm />} />
+          <Route path="/candidates" element={<CandidatesPipeline />} />
 
           {/* Admin pages */}
           <Route path="/admin" element={<AdminLogin />} />
@@ -36,6 +38,7 @@ function App() {
               </PrivateRoute>
             }
           />
+          
         </Route>
       </Routes>
     </Router>
