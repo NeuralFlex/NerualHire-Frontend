@@ -185,7 +185,6 @@ export default function CandidatesPipeline() {
             onSelectCandidate={setSelectedCandidate}
           />
         </div>
-
         {/* Right Pane */}
         <div className="flex-1 p-6">
           {selectedCandidate ? (
