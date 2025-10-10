@@ -20,7 +20,7 @@ const stageLabels = {
 
 export default function CandidatesPipeline() {
   const location = useLocation();
-  const jobId = location.state?.jobId; // ✅ Read jobId passed from Dashboard
+  const jobId = location.state?.jobId; 
 
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +41,6 @@ export default function CandidatesPipeline() {
         jobTitleMap[job.id] = job.title;
       });
 
-      // ✅ If a jobId was passed, store its title for header
       if (jobId && jobTitleMap[jobId]) {
         setJobTitle(jobTitleMap[jobId]);
       }
@@ -52,7 +51,6 @@ export default function CandidatesPipeline() {
           const candidate = app.candidate || {};
           const jobField = app.job;
 
-          // ✅ Fix: support both object and ID job field
           let jobTitle = "Unknown Job";
           let jobID = null;
           if (typeof jobField === "object" && jobField !== null) {
@@ -64,8 +62,6 @@ export default function CandidatesPipeline() {
               jobTitle = jobTitleMap[jobField];
             }
           }
-
-          // ✅ Resume link fix
           let resumeLink = candidate.resume;
           if (resumeLink && !resumeLink.startsWith("http")) {
             resumeLink = `${DJANGO_BASE_URL}${resumeLink}`;
@@ -83,7 +79,6 @@ export default function CandidatesPipeline() {
             applied_at: app.applied_at || "",
           };
         })
-        // ✅ Filter by jobId if passed
         .filter((app) => (jobId ? app.job_id === jobId : true));
 
       setApplications(normalizedData);
@@ -163,7 +158,7 @@ export default function CandidatesPipeline() {
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderBar
-        jobTitle={jobTitle} // ✅ Dynamic job title
+        jobTitle={jobTitle} 
         location="Remote - Pakistan"
         totalCandidates={applications.length}
       />

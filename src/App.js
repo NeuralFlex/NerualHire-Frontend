@@ -18,27 +18,12 @@ function App() {
           <Route path="/" element={<JobList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/jobs/:id/apply" element={<ApplyForm />} />
-          <Route path="/candidates" element={<CandidatesPipeline />} />
 
           {/* Admin pages */}
           <Route path="/admin" element={<AdminLogin />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/create-job"
-            element={
-              <PrivateRoute>
-                <CreateJobPage />
-              </PrivateRoute>
-            }
-          />
-          
+          <Route path="/dashboard" element={ <PrivateRoute> <Dashboard /> </PrivateRoute> }/>
+          <Route path="/create-job" element={<PrivateRoute> <CreateJobPage /> </PrivateRoute>}/>
+          <Route path="/candidates" element={<PrivateRoute> <CandidatesPipeline /> </PrivateRoute>}/>
         </Route>
       </Routes>
     </Router>
