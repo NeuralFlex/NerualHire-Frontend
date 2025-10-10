@@ -71,9 +71,9 @@ yarn add -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
 ```
 
-Create a .env file in the root directory and define:
+Create a .env file in the root directory and define(Optional):
 ```bash
-REACT_APP_API_BASE_URL=http://127.0.0.1:8000 (backend API URL)
+REACT_APP_API_BASE_URL=http://127.0.0.1:8000/api (backend API URL)
 REACT_APP_ENV=development
 ```
 
