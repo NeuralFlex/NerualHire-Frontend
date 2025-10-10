@@ -13,12 +13,20 @@ export default function Sidebar() {
   } = useSidebar();
 
   const location = useLocation();
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "admin";
 
-  const menuItems = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Create Job", path: "/create-job" },
-    { name: "Job List", path: "/" },
-  ];
+  // ✅ Show different menu items based on login role
+  const menuItems = isAdmin
+    ? [
+        { name: "Dashboard", path: "/dashboard" },
+        { name: "Create Job", path: "/create-job" },
+        { name: "Job List", path: "/" },
+      ]
+    : [
+        { name: "Job List", path: "/" },
+        { name: "Login", path: "/admin" },
+      ];
 
   return (
     <>
@@ -35,9 +43,14 @@ export default function Sidebar() {
           ${isExpanded ? "w-64" : "w-16"}
           ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
-        {/* Logo */}
-        <div className="flex items-center justify-center h-16 border-b border-gray-300">
-          <img src={logo} alt="Logo" className="h-8" />
+        {/* Logo + Company Name */}
+        <div className="flex items-center justify-center h-16 border-b border-gray-300 px-4">
+          <img src={logo} alt="Logo" className="h-9 w-22" />
+          {isExpanded && (
+            <span className="ml-3 text-xl font-bold text-gray-800 whitespace-nowrap">
+              NeuralHire
+            </span>
+          )}
         </div>
 
         {/* Menu */}
