@@ -1,4 +1,3 @@
-// src/components/CandidateDetail.jsx
 import React, { useMemo } from "react";
 import {
   FaArrowRight,
@@ -45,7 +44,6 @@ const CandidateDetail = ({
       </div>
     );
 
-  // ✅ Detect file type (PDF vs DOCX)
   const resumeUrl = candidate.resume_link?.startsWith("http")
     ? candidate.resume_link
     : `http://127.0.0.1:8000${candidate.resume_link}`;
@@ -132,7 +130,6 @@ const CandidateDetail = ({
         <div className="p-4 h-[700px] w-full flex justify-center items-center">
           {candidate.resume_link ? (
             isPdf ? (
-              // ✅ PDF Preview in iframe
               <iframe
                 src={resumeUrl}
                 title={`${candidate.candidate_name}'s Resume`}

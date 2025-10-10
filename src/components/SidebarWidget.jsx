@@ -44,7 +44,7 @@ export default function Sidebar() {
           ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
         {/* Logo + Company Name */}
-        <div className="flex items-center justify-center h-16 border-b border-gray-300 px-4">
+        <div className="flex items-center h-16 border-b border-gray-300 px-4">
           <img src={logo} alt="Logo" className="h-9 w-22" />
           {isExpanded && (
             <span className="ml-3 text-xl font-bold text-gray-800 whitespace-nowrap">
