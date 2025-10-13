@@ -1,171 +1,156 @@
-// src/pages/Dashboard.jsx
-import { useEffect, useState } from "react";
-import { Users, Briefcase, CalendarDays, FileText } from "lucide-react";
-import { motion } from "framer-motion";
-import { fetchJobs, fetchApplications } from "../api/api"; 
+import React, { useEffect, useState } from "react";
+import { fetchJobs } from "../api/api";
+import { useNavigate } from "react-router-dom";
+import API from "../api/api";
 
-export default function Dashboard() {
-  const [recentCandidates, setRecentCandidates] = useState([]);
-  const [recentJobs, setRecentJobs] = useState([]);
+const Dashboard = () => {
+  const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const [applicationsData, jobsData] = await Promise.all([
-          fetchApplications(),
-          fetchJobs(),
-        ]);
-
-        setRecentCandidates(
-          (applicationsData.results || applicationsData).slice(0, 5)
-        );
-        setRecentJobs((jobsData.results || jobsData).slice(0, 5));
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboardData();
+    loadJobs();
   }, []);
 
-  const stats = [
-    { label: "Active Jobs", value: recentJobs.length, icon: Briefcase },
-    { label: "Total Applicants", value: recentCandidates.length, icon: Users },
-    {
-      label: "Interviews Scheduled",
-      value: recentCandidates.filter((c) => c.stage === "Interview").length,
-      icon: CalendarDays,
-    },
-    {
-      label: "Pending Offers",
-      value: recentCandidates.filter((c) => c.stage === "Offer").length,
-      icon: FileText,
-    },
-  ];
+  const loadJobs = async () => {
+    try {
+      const jobsData = await fetchJobs();
+      setJobs(jobsData.results || jobsData || []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load jobs.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-600">
-        Loading Dashboard...
-      </div>
-    );
-  }
+  // ✅ Delete job
+  const handleDelete = async (jobId) => {
+    if (!window.confirm("Are you sure you want to delete this job?")) return;
+
+    try {
+      await API.delete(`jobs/${jobId}/`);
+      setJobs(jobs.filter((job) => job.id !== jobId));
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete job. Try again.");
+    }
+  };
+
+  // ✅ Close / Open job
+  const handleToggleStatus = async (jobId, isOpen) => {
+    try {
+      const endpoint = isOpen ? `jobs/${jobId}/close/` : `jobs/${jobId}/open/`;
+      await API.patch(endpoint);
+      setJobs(
+        jobs.map((job) =>
+          job.id === jobId ? { ...job, is_open: !isOpen } : job
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update job status:", err);
+      alert("Failed to update job status.");
+    }
+  };
+
+  if (loading)
+    return <p className="text-center py-10 text-gray-500">Loading...</p>;
+  if (error)
+    return <p className="text-center text-red-500 py-10">{error}</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-800">
-      {/* Header */}
-      <header className="bg-white shadow-sm p-6 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <a
-          href="/create-job"
-          className="bg-[#D64948] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#b63c3b] transition"
-        >
-          + New Job
-        </a>
-      </header>
+    <div className="space-y-12">
+      {/* ====== Top Stats ====== */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white shadow-sm rounded-2xl border border-gray-100 p-6">
+          <p className="text-sm text-gray-500">Total Jobs Posted</p>
+          <p className="text-3xl font-bold text-[#D64948] mt-2">
+            {jobs.length}
+          </p>
+        </div>
+      </div>
 
-      {/* Main Content */}
-      <main className="p-6 space-y-8">
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((s, index) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center space-x-4"
-            >
-              <div className="bg-[#D64948]/10 p-3 rounded-xl">
-                <s.icon className="text-[#D64948] w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">{s.label}</p>
-                <p className="text-2xl font-semibold">{s.value}</p>
-              </div>
-            </motion.div>
-          ))}
+      {/* ====== Job Management Section ====== */}
+      <section>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Job Management
+          </h2>
+          <button
+            onClick={() => navigate("/create-job")}
+            className="bg-[#D64948] text-white px-5 py-2 rounded-lg text-sm hover:bg-[#b63a39] transition"
+          >
+            + Create Job
+          </button>
         </div>
 
-        {/* Recent Data */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Candidates */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
-            <div className="p-5 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Recent Candidates</h2>
-              <a href="/candidates" className="text-[#D64948] text-sm font-medium">
-                View All
-              </a>
-            </div>
-            <ul>
-              {recentCandidates.length > 0 ? (
-                recentCandidates.map((c) => (
-                  <li
-                    key={c.id}
-                    className="px-5 py-4 flex justify-between items-center border-b border-gray-100 hover:bg-gray-50 transition"
+        {jobs.length > 0 ? (
+          <div className="grid md:grid-cols-2 gap-6">
+            {jobs.map((job) => (
+              <div
+                key={job.id}
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-transform hover:scale-[1.01] p-6"
+              >
+                <div className="flex justify-between items-start">
+                  <h3 className="text-lg font-bold text-[#D64948]">
+                    {job.title}
+                  </h3>
+                  <span
+                    className={`px-3 py-1 text-xs rounded-full font-semibold ${
+                      job.is_open
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
                   >
-                    <div>
-                      <p className="font-medium">{c.candidate_name}</p>
-                      <p className="text-sm text-gray-500">
-                        {c.job_title} •{" "}
-                        {new Date(c.applied_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </p>
-                    </div>
-                    <span className="text-xs text-gray-500 capitalize">
-                      {c.stage}
-                    </span>
-                  </li>
-                ))
-              ) : (
-                <p className="text-center py-6 text-gray-500">No candidates found.</p>
-              )}
-            </ul>
-          </div>
+                    {job.is_open ? "Open" : "Closed"}
+                  </span>
+                </div>
 
-          {/* Recent Jobs */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
-            <div className="p-5 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Recent Jobs</h2>
-              <a href="/jobs" className="text-[#D64948] text-sm font-medium">
-                View All
-              </a>
-            </div>
-            <ul>
-              {recentJobs.length > 0 ? (
-                recentJobs.map((job) => (
-                  <li
-                    key={job.id}
-                    className="px-5 py-4 flex justify-between items-center border-b border-gray-100 hover:bg-gray-50 transition"
+                <p className="text-gray-600 mt-2 line-clamp-2">
+                  {job.description?.substring(0, 100)}...
+                </p>
+                <p className="text-sm text-gray-500 mt-3">
+                  Location: {job.location || "N/A"}
+                </p>
+
+                <div className="mt-5 flex gap-3 flex-wrap">
+                  <button
+                    onClick={() =>
+                      navigate("/candidates", { state: { jobId: job.id } })
+                    }
+                    className="bg-[#D64948] px-4 py-2 text-white rounded-lg text-sm hover:bg-[#b63a39]"
                   >
-                    <div>
-                      <p className="font-medium">{job.title}</p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(job.created_at).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </p>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {job.openings} Opening{job.openings > 1 ? "s" : ""}
-                    </span>
-                  </li>
-                ))
-              ) : (
-                <p className="text-center py-6 text-gray-500">No jobs found.</p>
-              )}
-            </ul>
+                    View Candidates
+                  </button>
+
+                  <button
+                    onClick={() => handleToggleStatus(job.id, job.is_open)}
+                    className={`${
+                      job.is_open
+                        ? "bg-black-300 text-white-700 hover:bg-gray-100"
+                        : "bg-green-100 text-green-700 hover:bg-green-200"
+                    } px-4 py-2 rounded-lg text-sm transition`}
+                  >
+                    {job.is_open ? "Close Job" : "Reopen Job"}
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(job.id)}
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </main>
+        ) : (
+          <p className="text-gray-500">No jobs available.</p>
+        )}
+      </section>
     </div>
   );
-}
+};
+
+export default Dashboard;

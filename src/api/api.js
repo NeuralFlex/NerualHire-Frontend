@@ -6,17 +6,13 @@ const API = axios.create({
   baseURL: BASE_URL,
 });
 
-// **********************************************
-// 1. Initialize Authorization if token exists
-// **********************************************
+
 const initialToken = localStorage.getItem("access_token");
 if (initialToken) {
   API.defaults.headers.common["Authorization"] = `Bearer ${initialToken}`;
 }
 
-// **********************************************
-// 2. Request Interceptor — always attach token
-// **********************************************
+
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access_token");
@@ -28,9 +24,7 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// **********************************************
-// 3. Response Interceptor — Auto Refresh Expired Token
-// **********************************************
+
 let isRefreshing = false;
 let failedQueue = [];
 
@@ -102,9 +96,7 @@ API.interceptors.response.use(
   }
 );
 
-// **********************************************
-// 4. Authentication Helpers
-// **********************************************
+
 export const setAuthToken = (token) => {
   if (token) {
     localStorage.setItem("access_token", token);
@@ -120,7 +112,7 @@ export const logoutUser = () => {
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("role");
   delete API.defaults.headers.common["Authorization"];
-  window.location.href = "/login"; // redirect to login page
+  window.location.href = "/admin"; 
 };
 
 // Login helper (used in AdminLogin)
@@ -143,11 +135,8 @@ export const fetchUser = async () => {
   return { role };
 };
 
-// **********************************************
-// 5. Job Endpoints (Public Read Access)
-// **********************************************
+
 export const fetchJobs = async () => {
-  // Public endpoint — no auth needed
   const { data } = await axios.get(`${BASE_URL}jobs/`);
   return data;
 };
@@ -157,12 +146,10 @@ export const fetchJob = async (id) => {
   return data;
 };
 
-// **********************************************
-// 6. Application Endpoints (Admin only)
-// **********************************************
+
 export const fetchApplications = async () => {
   const { data } = await API.get("applications/");
-  return data.results || data; // handle both paginated & non-paginated
+  return data.results || data; 
 };
 
 export const updateApplicationStage = async (id, stage) => {
@@ -170,9 +157,7 @@ export const updateApplicationStage = async (id, stage) => {
   return data;
 };
 
-// **********************************************
-// 7. Candidate Job Application (Public)
-// **********************************************
+
 export const applyJob = async (id, formData) => {
   const { data } = await axios.post(`${BASE_URL}jobs/${id}/apply/`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
