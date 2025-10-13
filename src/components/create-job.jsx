@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../api/api"; // use your axios instance
 
 const CreateJobPage = () => {
   const navigate = useNavigate();
@@ -28,15 +28,23 @@ const CreateJobPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+
     try {
-      const token = localStorage.getItem("access"); // admin JWT
-      await axios.post("http://127.0.0.1:8000/api/jobs/", formData, {
+      // Convert to FormData
+      const form = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        form.append(key, value);
+      });
+
+      await API.post("jobs/", form, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
+
       setSuccess("Job created successfully!");
-      setError("");
       setFormData({
         title: "",
         company_details: "",
@@ -49,97 +57,102 @@ const CreateJobPage = () => {
         is_open: true,
       });
 
-      setTimeout(() => navigate("/admin-dashboard"), 1500);
+      setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err) {
-      setError("Failed to create job. Please check your input.");
-      setSuccess("");
+      console.error(err.response?.data || err);
+      const message =
+        err.response?.data?.title ||
+        err.response?.data?.type ||
+        JSON.stringify(err.response?.data) ||
+        "Failed to create job. Please check your input.";
+      setError(message);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
-      <h2 className="text-2xl font-bold mb-4 text-[#D64948]">Create Job</h2>
+    <div className="max-w-3xl mx-auto p-8 bg-white shadow-lg rounded-xl mt-8">
+      <h2 className="text-2xl font-bold mb-6 text-[#D64948]">Create Job</h2>
 
-      {error && <p className="text-red-600 mb-2">{error}</p>}
-      {success && <p className="text-green-600 mb-2">{success}</p>}
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {success && <p className="text-green-600 mb-4">{success}</p>}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Title */}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Job Title */}
         <div>
-          <label className="block font-medium">Job Title</label>
+          <label className="block font-medium mb-1">Job Title</label>
           <input
             type="text"
             name="title"
             value={formData.title}
             onChange={handleChange}
             required
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
 
         {/* Company Details */}
         <div>
-          <label className="block font-medium">Company Details</label>
+          <label className="block font-medium mb-1">Company Details</label>
           <textarea
             name="company_details"
             value={formData.company_details}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block font-medium">Description</label>
+          <label className="block font-medium mb-1">Description</label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
 
         {/* Requirements */}
         <div>
-          <label className="block font-medium">Requirements</label>
+          <label className="block font-medium mb-1">Requirements</label>
           <textarea
             name="requirements"
             value={formData.requirements}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
 
         {/* Benefits */}
         <div>
-          <label className="block font-medium">Benefits</label>
+          <label className="block font-medium mb-1">Benefits</label>
           <textarea
             name="benefits"
             value={formData.benefits}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
 
         {/* Responsibilities */}
         <div>
-          <label className="block font-medium">Responsibilities</label>
+          <label className="block font-medium mb-1">Responsibilities</label>
           <textarea
             name="responsibilities"
             value={formData.responsibilities}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
 
         {/* Job Type */}
         <div>
-          <label className="block font-medium">Job Type</label>
+          <label className="block font-medium mb-1">Job Type</label>
           <select
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           >
             <option value="full-time">Full Time</option>
             <option value="part-time">Part Time</option>
@@ -151,31 +164,32 @@ const CreateJobPage = () => {
 
         {/* Location */}
         <div>
-          <label className="block font-medium">Location</label>
+          <label className="block font-medium mb-1">Location</label>
           <input
             type="text"
             name="location"
             value={formData.location}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
 
         {/* Is Open */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
           <input
             type="checkbox"
             name="is_open"
             checked={formData.is_open}
             onChange={handleChange}
-            className="mr-2"
+            className="h-5 w-5 accent-[#D64948]"
           />
           <label className="font-medium">Open for Applications</label>
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
-          className="bg-[#D64948] text-white px-6 py-2 rounded-lg hover:bg-[#b73837] transition"
+          className="w-full bg-[#D64948] hover:bg-[#b73837] text-white font-medium px-6 py-3 rounded-lg transition"
         >
           Create Job
         </button>

@@ -126,14 +126,15 @@ const Dashboard = () => {
 
                   <button
                     onClick={() => handleToggleStatus(job.id, job.is_open)}
-                    className={`${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                       job.is_open
-                        ? "bg-gray-300 text-white-700 hover:bg-gray-100"
-                        : "bg-green-100 text-green-700 hover:bg-green-200"
-                    } px-4 py-2 rounded-lg text-sm transition`}
+                        ? "bg-gray-400 text-white hover:bg-gray-500"  // Close Job
+                        : "bg-[#6B7280] text-white hover:bg-[#14B8A7]]" // Reopen Job
+                    }`}
                   >
                     {job.is_open ? "Close Job" : "Reopen Job"}
                   </button>
+
 
                   <button
                     onClick={() => handleDelete(job.id)}
