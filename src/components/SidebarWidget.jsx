@@ -28,7 +28,6 @@ export default function Sidebar() {
     ? [
         { name: "Dashboard", path: "/dashboard" },
         { name: "Create Job", path: "/create-job" },
-        { name: "Job List", path: "/" },
         { name: "Log out", action: handleLogout }, 
       ]
     : [

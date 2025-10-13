@@ -1,173 +1,171 @@
-import React, { useEffect, useState } from "react";
-import {
-  fetchJobs,
-  fetchApplications,
-  updateApplicationStage,
-} from "../api/api";
-import { useNavigate } from "react-router-dom";
+// src/pages/Dashboard.jsx
+import { useEffect, useState } from "react";
+import { Users, Briefcase, CalendarDays, FileText } from "lucide-react";
+import { motion } from "framer-motion";
+import { fetchJobs, fetchApplications } from "../api/api"; 
 
-const Dashboard = () => {
-  const [jobs, setJobs] = useState([]);
-  const [applications, setApplications] = useState([]);
+export default function Dashboard() {
+  const [recentCandidates, setRecentCandidates] = useState([]);
+  const [recentJobs, setRecentJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadDashboardData = async () => {
       try {
-        const jobsData = await fetchJobs();
-        const appsData = await fetchApplications();
+        const [applicationsData, jobsData] = await Promise.all([
+          fetchApplications(),
+          fetchJobs(),
+        ]);
 
-        setJobs(jobsData.results || jobsData || []);
-        if (Array.isArray(appsData)) setApplications(appsData);
-        else if (appsData.results) setApplications(appsData.results);
-        else setApplications([]);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load dashboard data.");
+        setRecentCandidates(
+          (applicationsData.results || applicationsData).slice(0, 5)
+        );
+        setRecentJobs((jobsData.results || jobsData).slice(0, 5));
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
     };
-    loadData();
+
+    loadDashboardData();
   }, []);
 
-  if (loading)
-    return <p className="text-center py-10 text-gray-500">Loading...</p>;
-  if (error)
-    return <p className="text-center text-red-500 py-10">{error}</p>;
+  const stats = [
+    { label: "Active Jobs", value: recentJobs.length, icon: Briefcase },
+    { label: "Total Applicants", value: recentCandidates.length, icon: Users },
+    {
+      label: "Interviews Scheduled",
+      value: recentCandidates.filter((c) => c.stage === "Interview").length,
+      icon: CalendarDays,
+    },
+    {
+      label: "Pending Offers",
+      value: recentCandidates.filter((c) => c.stage === "Offer").length,
+      icon: FileText,
+    },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-gray-600">
+        Loading Dashboard...
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-12">
-      {/* ====== Top Stats ====== */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white shadow-sm rounded-2xl border border-gray-100 p-6">
-          <p className="text-sm text-gray-500">Total Jobs Posted</p>
-          <p className="text-3xl font-bold text-[#D64948] mt-2">
-            {jobs.length}
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-100 text-gray-800">
+      {/* Header */}
+      <header className="bg-white shadow-sm p-6 flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <a
+          href="/create-job"
+          className="bg-[#D64948] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#b63c3b] transition"
+        >
+          + New Job
+        </a>
+      </header>
 
-        <div className="bg-white shadow-sm rounded-2xl border border-gray-100 p-6">
-          <p className="text-sm text-gray-500">Interviews Scheduled</p>
-          <p className="text-3xl font-bold text-[#D64948] mt-2">
-            {applications.filter((a) => a.stage === "interview").length}
-          </p>
-        </div>
-      </div>
-
-      {/* ====== Recent Job Postings ====== */}
-      <section>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Recent Job Postings
-          </h2>
-          <button
-            onClick={() => navigate("/create-job")}
-            className="bg-[#D64948] text-white px-5 py-2 rounded-lg text-sm hover:bg-[#b63a39] transition"
-          >
-            + Create Job
-          </button>
-        </div>
-
-        {jobs.length > 0 ? (
-          <div className="grid md:grid-cols-2 gap-6">
-            {jobs.slice(0, 4).map((job) => (
-              <div
-                key={job.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-transform hover:scale-[1.01] p-6"
-              >
-                <h3 className="text-lg font-bold text-[#D64948]">
-                  {job.title}
-                </h3>
-                <p className="text-gray-600 mt-2 line-clamp-2">
-                  {job.description?.substring(0, 100)}...
-                </p>
-                <p className="text-sm text-gray-500 mt-3">
-                  Location: {job.location}
-                </p>
-
-                <div className="mt-5 flex gap-3">
-                  <button
-                    onClick={() =>
-                      navigate("/candidates", { state: { jobId: job.id } })
-                    }
-                    className="bg-[#D64948] px-4 py-2 text-white rounded-lg text-sm hover:bg-[#b63a39]"
-                  >
-                    View Candidates
-                  </button>
-
-                  <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300">
-                    Delete
-                  </button>
-                </div>
+      {/* Main Content */}
+      <main className="p-6 space-y-8">
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((s, index) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex items-center space-x-4"
+            >
+              <div className="bg-[#D64948]/10 p-3 rounded-xl">
+                <s.icon className="text-[#D64948] w-6 h-6" />
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500">No job postings yet.</p>
-        )}
-      </section>
+              <div>
+                <p className="text-sm text-gray-500">{s.label}</p>
+                <p className="text-2xl font-semibold">{s.value}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-      {/* ====== Recent Candidates Section ====== */}
-      <section>
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">
-          Recent Candidates
-        </h2>
-        {applications.length > 0 ? (
-          <div className="overflow-x-auto bg-white rounded-2xl border border-gray-100 shadow-sm">
-            <table className="min-w-full text-sm text-left text-gray-700">
-              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
-                <tr>
-                  <th className="px-6 py-3 font-medium">Candidate</th>
-                  <th className="px-6 py-3 font-medium">Job</th>
-                  <th className="px-6 py-3 font-medium">Stage</th>
-                  <th className="px-6 py-3 font-medium">Applied On</th>
-                </tr>
-              </thead>
-              <tbody>
-                {applications.slice(0, 5).map((app) => (
-                  <tr
-                    key={app.id}
-                    className="border-b border-gray-100 hover:bg-gray-50 transition"
+        {/* Recent Data */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Candidates */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center">
+              <h2 className="text-lg font-semibold">Recent Candidates</h2>
+              <a href="/candidates" className="text-[#D64948] text-sm font-medium">
+                View All
+              </a>
+            </div>
+            <ul>
+              {recentCandidates.length > 0 ? (
+                recentCandidates.map((c) => (
+                  <li
+                    key={c.id}
+                    className="px-5 py-4 flex justify-between items-center border-b border-gray-100 hover:bg-gray-50 transition"
                   >
-                    <td className="px-6 py-4 font-medium text-gray-800">
-                      {app.candidate?.full_name || app.candidate_name}
-                    </td>
-                    <td className="px-6 py-4">{app.job_title}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          app.stage === "interview"
-                            ? "bg-indigo-100 text-indigo-700"
-                            : app.stage === "offered"
-                            ? "bg-green-100 text-green-700"
-                            : app.stage === "rejected"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {app.stage.replace("_", " ")}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {new Date(app.applied_at).toLocaleString("en-US", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    <div>
+                      <p className="font-medium">{c.candidate_name}</p>
+                      <p className="text-sm text-gray-500">
+                        {c.job_title} •{" "}
+                        {new Date(c.applied_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <span className="text-xs text-gray-500 capitalize">
+                      {c.stage}
+                    </span>
+                  </li>
+                ))
+              ) : (
+                <p className="text-center py-6 text-gray-500">No candidates found.</p>
+              )}
+            </ul>
           </div>
-        ) : (
-          <p className="text-gray-500">No candidates have applied yet.</p>
-        )}
-      </section>
+
+          {/* Recent Jobs */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200">
+            <div className="p-5 border-b border-gray-100 flex justify-between items-center">
+              <h2 className="text-lg font-semibold">Recent Jobs</h2>
+              <a href="/jobs" className="text-[#D64948] text-sm font-medium">
+                View All
+              </a>
+            </div>
+            <ul>
+              {recentJobs.length > 0 ? (
+                recentJobs.map((job) => (
+                  <li
+                    key={job.id}
+                    className="px-5 py-4 flex justify-between items-center border-b border-gray-100 hover:bg-gray-50 transition"
+                  >
+                    <div>
+                      <p className="font-medium">{job.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(job.created_at).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {job.openings} Opening{job.openings > 1 ? "s" : ""}
+                    </span>
+                  </li>
+                ))
+              ) : (
+                <p className="text-center py-6 text-gray-500">No jobs found.</p>
+              )}
+            </ul>
+          </div>
+        </div>
+      </main>
     </div>
   );
-};
-
-export default Dashboard;
+}
