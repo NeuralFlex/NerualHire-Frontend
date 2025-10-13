@@ -13,14 +13,13 @@ const AdminLogin = () => {
     e.preventDefault();
     try {
       const response = await api.post("token/", { username, password });
-      const { access, refresh, role } = response.data; // ✅ include role here
+      const { access, refresh, role } = response.data;
 
       // Save tokens and role
       localStorage.setItem("access_token", access);
       localStorage.setItem("refresh_token", refresh);
       localStorage.setItem("role", role);
 
-      // Set auth header for Axios
       setAuthToken(access);
 
       navigate("/dashboard");
