@@ -15,7 +15,6 @@ const AdminLogin = () => {
       const response = await api.post("token/", { username, password });
       const { access, refresh, role } = response.data;
 
-      // Save tokens and role
       localStorage.setItem("access_token", access);
       localStorage.setItem("refresh_token", refresh);
       localStorage.setItem("role", role);
@@ -30,13 +29,13 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f9fafb]">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        {/* Logo & Header */}
+    <div className="min-h-screen flex items-start justify-center bg-[#f9fafb] pt-20">
+      <div className="bg-white p-7 rounded-2xl shadow-xl w-full max-w-md">
+        {/* Logo + Header */}
         <div className="flex flex-col items-center mb-6">
-          <img src={logo} alt="Logo" className="h-14 mb-4" />
+          <img src={logo} alt="Logo" className="h-12 mb-3" />
           <h2 className="text-2xl font-bold text-gray-900">Admin Login</h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 text-center">
             Sign in to access your dashboard
           </p>
         </div>
