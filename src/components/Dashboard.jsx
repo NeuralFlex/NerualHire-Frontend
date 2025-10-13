@@ -128,7 +128,7 @@ const Dashboard = () => {
                     onClick={() => handleToggleStatus(job.id, job.is_open)}
                     className={`${
                       job.is_open
-                        ? "bg-black-300 text-white-700 hover:bg-gray-100"
+                        ? "bg-gray-300 text-white-700 hover:bg-gray-100"
                         : "bg-green-100 text-green-700 hover:bg-green-200"
                     } px-4 py-2 rounded-lg text-sm transition`}
                   >
