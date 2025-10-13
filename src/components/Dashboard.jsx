@@ -6,18 +6,9 @@ import {
 } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
-const stageColors = {
-  applied: "bg-gray-100 text-gray-700",
-  phone_screen: "bg-yellow-100 text-yellow-700",
-  interview: "bg-indigo-100 text-indigo-700",
-  offered: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-700",
-};
-
 const Dashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [applications, setApplications] = useState([]);
-  const [selectedJob, setSelectedJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -34,26 +25,13 @@ const Dashboard = () => {
         else setApplications([]);
       } catch (err) {
         console.error(err);
-        setError("Failed to fetch data");
+        setError("Failed to load dashboard data.");
       } finally {
         setLoading(false);
       }
     };
-
     loadData();
   }, []);
-
-  const handleStageChange = async (appId, newStage) => {
-    try {
-      const updated = await updateApplicationStage(appId, newStage);
-      setApplications((prev) =>
-        prev.map((app) => (app.id === appId ? updated : app))
-      );
-    } catch (err) {
-      console.error(err);
-      setError("Failed to update stage");
-    }
-  };
 
   if (loading)
     return <p className="text-center py-10 text-gray-500">Loading...</p>;
@@ -61,34 +39,33 @@ const Dashboard = () => {
     return <p className="text-center text-red-500 py-10">{error}</p>;
 
   return (
-    <div>
-      {/* === Stats === */}
-      <div className="grid md:grid-cols-3 gap-6 mb-10">
-        <div className="bg-white shadow rounded-xl p-6 border border-gray-100">
-          <p className="text-sm text-gray-500">Total Jobs</p>
-          <p className="text-2xl font-bold text-[#D64948]">{jobs.length}</p>
-        </div>
-        <div className="bg-white shadow rounded-xl p-6 border border-gray-100">
-          <p className="text-sm text-gray-500">Total Applications</p>
-          <p className="text-2xl font-bold text-[#D64948]">
-            {applications.length}
+    <div className="space-y-12">
+      {/* ====== Top Stats ====== */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white shadow-sm rounded-2xl border border-gray-100 p-6">
+          <p className="text-sm text-gray-500">Total Jobs Posted</p>
+          <p className="text-3xl font-bold text-[#D64948] mt-2">
+            {jobs.length}
           </p>
         </div>
-        <div className="bg-white shadow rounded-xl p-6 border border-gray-100">
+
+        <div className="bg-white shadow-sm rounded-2xl border border-gray-100 p-6">
           <p className="text-sm text-gray-500">Interviews Scheduled</p>
-          <p className="text-2xl font-bold text-[#D64948]">
+          <p className="text-3xl font-bold text-[#D64948] mt-2">
             {applications.filter((a) => a.stage === "interview").length}
           </p>
         </div>
       </div>
 
-      {/* === Jobs === */}
-      <section className="mb-12">
+      {/* ====== Recent Job Postings ====== */}
+      <section>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Jobs</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Recent Job Postings
+          </h2>
           <button
-            className="bg-[#D64948] text-white px-4 py-2 rounded-lg hover:bg-[#b63a39] transition"
             onClick={() => navigate("/create-job")}
+            className="bg-[#D64948] text-white px-5 py-2 rounded-lg text-sm hover:bg-[#b63a39] transition"
           >
             + Create Job
           </button>
@@ -96,120 +73,99 @@ const Dashboard = () => {
 
         {jobs.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-6">
-            {jobs.map((job) => (
+            {jobs.slice(0, 4).map((job) => (
               <div
                 key={job.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md hover:scale-[1.01] transition transform p-6"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-transform hover:scale-[1.01] p-6"
               >
-                <h3 className="text-lg font-bold text-[#D64948]">{job.title}</h3>
-                <p className="text-gray-600 mt-2">
+                <h3 className="text-lg font-bold text-[#D64948]">
+                  {job.title}
+                </h3>
+                <p className="text-gray-600 mt-2 line-clamp-2">
                   {job.description?.substring(0, 100)}...
                 </p>
-                <p className="text-sm text-gray-700 mt-3">📍 {job.location}</p>
-                <div className="mt-4 flex gap-3">
-                <button
-                  onClick={() => setSelectedJob(job.id)}
-                  className="bg-[#D64948] text-white px-3 py-1 rounded-lg text-sm hover:bg-[#b63a39]"
-                >
-                  View Applications
-                </button>
+                <p className="text-sm text-gray-500 mt-3">
+                  Location: {job.location}
+                </p>
 
-                <button
-                  onClick={() => navigate("/candidates", { state: { jobId: job.id } })}
-                  className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm hover:bg-blue-200"
-                >
-                  View Pipeline
-                </button>
+                <div className="mt-5 flex gap-3">
+                  <button
+                    onClick={() =>
+                      navigate("/candidates", { state: { jobId: job.id } })
+                    }
+                    className="bg-[#D64948] px-4 py-2 text-white rounded-lg text-sm hover:bg-[#b63a39]"
+                  >
+                    View Candidates
+                  </button>
 
-                <button className="bg-gray-200 text-gray-800 px-3 py-1 rounded-lg text-sm hover:bg-gray-300">
-                  Delete
-                </button>
-            </div>
-
+                  <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300">
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No jobs available.</p>
+          <p className="text-gray-500">No job postings yet.</p>
         )}
       </section>
 
-      {/* === Applications === */}
-      {selectedJob && (
-        <section>
-          <h2 className="text-xl font-semibold mb-6 text-gray-900">
-            Applications for{" "}
-            {jobs.find((j) => j.id === selectedJob)?.title || "Job"}
-          </h2>
-          <div className="overflow-x-auto rounded-xl shadow-md bg-white border border-gray-200">
-            <table className="w-full text-sm text-left border-collapse">
-              <thead className="bg-[#D64948]/10 text-gray-900 uppercase">
+      {/* ====== Recent Candidates Section ====== */}
+      <section>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          Recent Candidates
+        </h2>
+        {applications.length > 0 ? (
+          <div className="overflow-x-auto bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <table className="min-w-full text-sm text-left text-gray-700">
+              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
                 <tr>
-                  <th className="py-3 px-4">Candidate</th>
-                  <th className="py-3 px-4">Email</th>
-                  <th className="py-3 px-4">Stage</th>
-                  <th className="py-3 px-4">Update Stage</th>
+                  <th className="px-6 py-3 font-medium">Candidate</th>
+                  <th className="px-6 py-3 font-medium">Job</th>
+                  <th className="px-6 py-3 font-medium">Stage</th>
+                  <th className="px-6 py-3 font-medium">Applied On</th>
                 </tr>
               </thead>
               <tbody>
-                {applications.filter((a) => a.job === selectedJob).length > 0 ? (
-                  applications
-                    .filter((a) => a.job === selectedJob)
-                    .map((app, index) => (
-                      <tr
-                        key={app.id}
-                        className={`border-b ${
-                          index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                        } hover:bg-[#D64948]/5 transition`}
+                {applications.slice(0, 5).map((app) => (
+                  <tr
+                    key={app.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition"
+                  >
+                    <td className="px-6 py-4 font-medium text-gray-800">
+                      {app.candidate?.full_name || app.candidate_name}
+                    </td>
+                    <td className="px-6 py-4">{app.job_title}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          app.stage === "interview"
+                            ? "bg-indigo-100 text-indigo-700"
+                            : app.stage === "offered"
+                            ? "bg-green-100 text-green-700"
+                            : app.stage === "rejected"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
                       >
-                        <td className="py-3 px-4 text-gray-900">
-                          {app.candidate.full_name}
-                        </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {app.candidate.email}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              stageColors[app.stage] ||
-                              "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            {app.stage.replace("_", " ")}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <select
-                            value={app.stage}
-                            onChange={(e) =>
-                              handleStageChange(app.id, e.target.value)
-                            }
-                            className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#D64948] focus:outline-none bg-white text-gray-900 border-gray-300"
-                          >
-                            <option value="applied">Applied</option>
-                            <option value="phone_screen">Phone Screen</option>
-                            <option value="interview">Interview</option>
-                            <option value="offered">Offered</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
-                        </td>
-                      </tr>
-                    ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="4"
-                      className="text-center py-6 text-gray-500 italic"
-                    >
-                      No applications for this job.
+                        {app.stage.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">
+                      {new Date(app.applied_at).toLocaleString("en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
-        </section>
-      )}
+        ) : (
+          <p className="text-gray-500">No candidates have applied yet.</p>
+        )}
+      </section>
     </div>
   );
 };
