@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api/api"; // use your axios instance
+import API from "../api/api"; 
 
 const CreateJobPage = () => {
   const navigate = useNavigate();
@@ -32,7 +32,6 @@ const CreateJobPage = () => {
     setSuccess("");
 
     try {
-      // Convert to FormData
       const form = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
         form.append(key, value);

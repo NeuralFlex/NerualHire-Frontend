@@ -25,7 +25,6 @@ const Dashboard = () => {
     }
   };
 
-  // ✅ Delete job
   const handleDelete = async (jobId) => {
     if (!window.confirm("Are you sure you want to delete this job?")) return;
 
@@ -38,7 +37,6 @@ const Dashboard = () => {
     }
   };
 
-  // ✅ Close / Open job
   const handleToggleStatus = async (jobId, isOpen) => {
     try {
       const endpoint = isOpen ? `jobs/${jobId}/close/` : `jobs/${jobId}/open/`;
@@ -61,7 +59,6 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-12">
-      {/* ====== Top Stats ====== */}
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-white shadow-sm rounded-2xl border border-gray-100 p-6">
           <p className="text-sm text-gray-500">Total Jobs Posted</p>
@@ -71,7 +68,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* ====== Job Management Section ====== */}
       <section>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-900">
