@@ -20,7 +20,7 @@ const stageLabels = {
 
 export default function CandidatesPipeline() {
   const location = useLocation();
-  const jobId = location.state?.jobId; 
+  const jobId = location.state?.jobId;
 
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +28,7 @@ export default function CandidatesPipeline() {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [jobTitle, setJobTitle] = useState("Candidate Pipeline");
 
+  // ✅ Load applications
   const loadApplications = useCallback(async () => {
     try {
       const [appsData, jobsData] = await Promise.all([
@@ -35,7 +36,6 @@ export default function CandidatesPipeline() {
         fetch(`${DJANGO_BASE_URL}/api/jobs/`).then((res) => res.json()),
       ]);
 
-      // Convert job array to { id: title }
       const jobTitleMap = {};
       (jobsData.results || jobsData).forEach((job) => {
         jobTitleMap[job.id] = job.title;
@@ -45,7 +45,6 @@ export default function CandidatesPipeline() {
         setJobTitle(jobTitleMap[jobId]);
       }
 
-      // Normalize and filter data
       const normalizedData = appsData
         .map((app) => {
           const candidate = app.candidate || {};
@@ -62,6 +61,7 @@ export default function CandidatesPipeline() {
               jobTitle = jobTitleMap[jobField];
             }
           }
+
           let resumeLink = candidate.resume;
           if (resumeLink && !resumeLink.startsWith("http")) {
             resumeLink = `${DJANGO_BASE_URL}${resumeLink}`;
@@ -88,6 +88,8 @@ export default function CandidatesPipeline() {
       );
       if (initialCandidates.length > 0) {
         setSelectedCandidate(initialCandidates[0]);
+      } else {
+        setSelectedCandidate(null);
       }
     } catch (error) {
       console.error("Error fetching applications:", error);
@@ -100,7 +102,7 @@ export default function CandidatesPipeline() {
     loadApplications();
   }, [loadApplications]);
 
-  // Move Forward
+  // ✅ Move candidate to next stage
   const moveToNextStage = async (app) => {
     const currentIndex = PIPELINE_STAGES.indexOf(app.stage);
     if (currentIndex === -1 || currentIndex >= PIPELINE_STAGES.length - 1) return;
@@ -111,13 +113,14 @@ export default function CandidatesPipeline() {
       setApplications((prev) =>
         prev.map((a) => (a.id === app.id ? { ...a, stage: nextStage } : a))
       );
+
+      setActiveStage(nextStage);
       setSelectedCandidate(null);
     } catch (err) {
       console.error("Failed to move stage:", err);
     }
   };
 
-  // Move Backward
   const moveToPreviousStage = async (app) => {
     const currentIndex = PIPELINE_STAGES.indexOf(app.stage);
     if (currentIndex <= 0) return;
@@ -128,11 +131,41 @@ export default function CandidatesPipeline() {
       setApplications((prev) =>
         prev.map((a) => (a.id === app.id ? { ...a, stage: prevStage } : a))
       );
+
+      setActiveStage(prevStage);
       setSelectedCandidate(null);
     } catch (err) {
       console.error("Failed to move stage:", err);
     }
   };
+
+  const handleDisqualify = async (candidate) => {
+    try {
+      await updateApplicationStage(candidate.id, "rejected");
+      setApplications((prev) =>
+        prev.map((a) =>
+          a.id === candidate.id ? { ...a, stage: "rejected" } : a
+        )
+      );
+      setSelectedCandidate(null);
+    } catch (err) {
+      console.error("Failed to disqualify candidate:", err);
+    }
+  };
+
+  const handleRestoreCandidate = async (candidate) => {
+  try {
+    await updateApplicationStage(candidate.id, "applied"); // or previous stage
+    setApplications((prev) =>
+      prev.map((a) =>
+        a.id === candidate.id ? { ...a, stage: "applied" } : a
+      )
+    );
+    setSelectedCandidate(null);
+  } catch (err) {
+    console.error("Failed to restore candidate:", err);
+  }
+};
 
   const candidatesInActiveStage = useMemo(() => {
     return applications.filter((a) => a.stage === activeStage);
@@ -158,7 +191,7 @@ export default function CandidatesPipeline() {
   return (
     <div className="min-h-screen bg-gray-50">
       <HeaderBar
-        jobTitle={jobTitle} 
+        jobTitle={jobTitle}
         location="Remote - Pakistan"
         totalCandidates={applications.length}
       />
@@ -180,6 +213,7 @@ export default function CandidatesPipeline() {
             onSelectCandidate={setSelectedCandidate}
           />
         </div>
+
         {/* Right Pane */}
         <div className="flex-1 p-6">
           {selectedCandidate ? (
@@ -189,6 +223,9 @@ export default function CandidatesPipeline() {
               onMoveToPreviousStage={moveToPreviousStage}
               nextStageLabel={nextStageLabel}
               prevStageLabel={prevStageLabel}
+              onDisqualify={handleDisqualify}
+              setActiveStage={setActiveStage} 
+              onRestoreCandidate={handleRestoreCandidate}
             />
           ) : (
             <div className="text-center p-10 text-gray-500">

@@ -14,6 +14,9 @@ const CandidateDetail = ({
   onMoveToPreviousStage,
   nextStageLabel,
   prevStageLabel,
+  onDisqualify,
+  setActiveStage,
+  onRestoreCandidate,
 }) => {
   const initials = useMemo(() => {
     if (!candidate || !candidate.candidate_name) return "UN";
@@ -49,45 +52,65 @@ const CandidateDetail = ({
     : `http://127.0.0.1:8000${candidate.resume_link}`;
   const isPdf = resumeUrl?.toLowerCase().endsWith(".pdf");
 
+  const handleDisqualify = async () => {
+    if (window.confirm("Are you sure you want to disqualify this candidate?")) {
+        onDisqualify(candidate); 
+  }
+};
+
   return (
     <div className="space-y-6">
-      {/* Top Action Bar */}
-      <div className="flex justify-end items-center bg-white p-4 rounded-lg border shadow-sm sticky top-0 z-10">
-        <div className="flex space-x-3">
-          {/* Disqualify */}
+ {/* Top Action Bar */}
+<div className="flex justify-end items-center bg-white p-4 rounded-lg border shadow-sm sticky top-0 z-10">
+  <div className="flex space-x-3">
+    {/* If candidate is Disqualified — show Restore button */}
+    {candidate.stage === "rejected" ? (
+      <button
+        className="flex items-center px-4 py-2 text-sm bg-[#D64948] text-white font-medium rounded-lg shadow-md hover:bg-[#b53d3d] transition duration-150"
+        onClick={() => {
+          if (window.confirm("Restore this candidate to Applied stage?")) {
+            onRestoreCandidate(candidate);
+          }
+        }}
+      >
+        <FaArrowLeft className="mr-2" />
+        Restore Candidate
+      </button>
+    ) : (
+      /* Otherwise show Disqualify + Move buttons */
+      <>
+        <button
+          className="flex items-center px-4 py-2 text-sm text-[#D64948] border border-[#D64948] bg-white font-medium rounded-lg shadow-sm hover:bg-[#FCEAEA] transition duration-150"
+          onClick={handleDisqualify}
+        >
+          <FaBan className="mr-2" />
+          Disqualify
+        </button>
+
+        {canMoveBack && (
           <button
-            className="flex items-center px-4 py-2 text-sm text-red-600 border border-red-600 bg-white font-medium rounded-lg shadow-sm hover:bg-red-50 transition duration-150"
-            onClick={() =>
-              onMoveToNextStage({ ...candidate, stage: "rejected" })
-            }
+            className="flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-300 transition duration-150"
+            onClick={() => onMoveToPreviousStage(candidate)}
           >
-            <FaBan className="mr-2" />
-            Disqualify
+            <FaArrowLeft className="mr-2" />
+            Move to {prevStageLabel}
           </button>
+        )}
 
-          {/* Reverse Stage */}
-          {canMoveBack && (
-            <button
-              className="flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-300 transition duration-150"
-              onClick={() => onMoveToPreviousStage(candidate)}
-            >
-              <FaArrowLeft className="mr-2" />
-              Move to {prevStageLabel}
-            </button>
-          )}
+        {canMoveForward && (
+          <button
+            className="flex items-center px-4 py-2 text-sm bg-[#D64948] text-white font-medium rounded-lg shadow-md hover:bg-[#b53d3d] transition duration-150"
+            onClick={() => onMoveToNextStage(candidate)}
+          >
+            <FaArrowRight className="mr-2" />
+            Move to {nextStageLabel}
+          </button>
+        )}
+      </>
+    )}
+  </div>
+</div>
 
-          {/* Move Forward */}
-          {canMoveForward && (
-            <button
-              className="flex items-center px-4 py-2 text-sm bg-[#D64948] text-white font-medium rounded-lg shadow-md hover:bg-[#b53d3d] transition duration-150"
-              onClick={() => onMoveToNextStage(candidate)}
-            >
-              <FaArrowRight className="mr-2" />
-              Move to {nextStageLabel}
-            </button>
-          )}
-        </div>
-      </div>
 
       {/* Candidate Info */}
       <div className="bg-white p-6 rounded-lg border shadow-sm">
@@ -101,7 +124,6 @@ const CandidateDetail = ({
               {candidate.candidate_name}
             </h2>
             <p className="text-sm text-gray-600 mt-1 font-medium">
-              {/* ✅ Real Job Title */}
               {candidate.job_title || "No Job Title"}
             </p>
             <p className="text-sm text-gray-500 flex items-center">
@@ -136,7 +158,6 @@ const CandidateDetail = ({
                 className="w-full h-full border border-gray-300 rounded-lg"
               />
             ) : (
-              // ✅ DOCX or Other: Download Button
               <div className="text-center">
                 <p className="text-gray-600 mb-4">
                   Resume preview not supported for this file type.
@@ -153,7 +174,7 @@ const CandidateDetail = ({
             )
           ) : (
             <div className="bg-red-50 p-4 border border-dashed border-red-300 text-center text-red-700 h-full flex items-center justify-center rounded-lg">
-              ⚠️ Resume link is missing for this candidate.
+               Resume link is missing for this candidate.
             </div>
           )}
         </div>

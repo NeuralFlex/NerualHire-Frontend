@@ -10,7 +10,6 @@ const HeaderBar = ({ jobTitle, location, totalCandidates }) => {
           <h1 className="text-2xl font-bold text-[#3F4040] flex items-center">
             {jobTitle}
             <button className="ml-2 p-1 text-gray-400 hover:text-[#D64948] transition-colors">
-              <FaPencilAlt size={16} />
             </button>
           </h1>
         </div>
