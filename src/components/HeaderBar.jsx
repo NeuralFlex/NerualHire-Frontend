@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaPencilAlt, FaChevronDown } from 'react-icons/fa';
+import { FaChevronDown } from 'react-icons/fa';
 
 const HeaderBar = ({ jobTitle, location, totalCandidates }) => {
   return (
