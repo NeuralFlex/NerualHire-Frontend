@@ -28,7 +28,7 @@ export default function CandidatesPipeline() {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [jobTitle, setJobTitle] = useState("Candidate Pipeline");
 
-  // ✅ Load applications
+
   const loadApplications = useCallback(async () => {
     try {
       const [appsData, jobsData] = await Promise.all([
@@ -102,7 +102,6 @@ export default function CandidatesPipeline() {
     loadApplications();
   }, [loadApplications]);
 
-  // ✅ Move candidate to next stage
   const moveToNextStage = async (app) => {
     const currentIndex = PIPELINE_STAGES.indexOf(app.stage);
     if (currentIndex === -1 || currentIndex >= PIPELINE_STAGES.length - 1) return;
@@ -155,7 +154,7 @@ export default function CandidatesPipeline() {
 
   const handleRestoreCandidate = async (candidate) => {
   try {
-    await updateApplicationStage(candidate.id, "applied"); // or previous stage
+    await updateApplicationStage(candidate.id, "applied"); 
     setApplications((prev) =>
       prev.map((a) =>
         a.id === candidate.id ? { ...a, stage: "applied" } : a

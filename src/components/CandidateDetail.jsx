@@ -63,7 +63,6 @@ const CandidateDetail = ({
  {/* Top Action Bar */}
 <div className="flex justify-end items-center bg-white p-4 rounded-lg border shadow-sm sticky top-0 z-10">
   <div className="flex space-x-3">
-    {/* If candidate is Disqualified — show Restore button */}
     {candidate.stage === "rejected" ? (
       <button
         className="flex items-center px-4 py-2 text-sm bg-[#D64948] text-white font-medium rounded-lg shadow-md hover:bg-[#b53d3d] transition duration-150"
@@ -77,7 +76,6 @@ const CandidateDetail = ({
         Restore Candidate
       </button>
     ) : (
-      /* Otherwise show Disqualify + Move buttons */
       <>
         <button
           className="flex items-center px-4 py-2 text-sm text-[#D64948] border border-[#D64948] bg-white font-medium rounded-lg shadow-sm hover:bg-[#FCEAEA] transition duration-150"
