@@ -6,7 +6,8 @@ import CandidateList from "./CandidateList";
 import CandidateDetail from "./CandidateDetail";
 import { useLocation } from "react-router-dom";
 
-const DJANGO_BASE_URL = "http://127.0.0.1:8000";
+const API_URL = process.env.REACT_APP_API_URL;
+const DJANGO_BASE_URL = API_URL.replace("/api/", "");
 
 const PIPELINE_STAGES = ["applied", "screening", "interview", "hired", "rejected"];
 
