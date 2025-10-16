@@ -34,7 +34,7 @@ const ApplyForm = ({ jobId: propJobId }) => {
       const data = await applyJob(jobId, formData);
       if (data.error) throw new Error(data.error);
 
-      setMessage("✅ Your application has been submitted successfully!");
+      setMessage("Your application has been submitted successfully!");
       setShowModal(true);
 
       // Reset fields
