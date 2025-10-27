@@ -5,20 +5,27 @@ import Header from "./Header";
 import { useSidebar } from "../components/SidebarContext";
 
 const Layout = () => {
-  const { isExpanded } = useSidebar();
+  const { 
+    isExpanded, 
+    isMobile, 
+    isMobileOpen 
+  } = useSidebar();
+
+  const sidebarMarginClass = isExpanded ? "lg:ml-64" : "lg:ml-16";
 
   return (
-    <div className="min-h-screen bg-gray-50 ">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-gray-50">
+      
+      {/* 1. Sidebar (Fixed) */}
       <Sidebar />
 
-      {/* Main content area */}
+      <Header />
+
+      {/* 3. Main Content Wrapper: This is the area for the Header + Main Content */}
       <div
-        className={`flex flex-col transition-all duration-300
-          ${isExpanded ? "ml-64" : "ml-16"}`}
+        className={`flex flex-col min-h-screen transition-all duration-300 ${sidebarMarginClass}`}
       >
-        <Header />
-        <main className="p-6">
+        <main className="flex-grow pt-16 p-6"> 
           <Outlet />
         </main>
       </div>
