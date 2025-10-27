@@ -25,7 +25,7 @@ export default function Sidebar() {
     navigate("/admin");
   };
 
-  // 👇 New function to handle navigation clicks
+  //  New function to handle navigation clicks
   const handleNavClick = (item) => {
     setActiveItem(item.name);
     // Automatically close the sidebar on mobile when navigating
@@ -42,7 +42,6 @@ export default function Sidebar() {
       ]
     : [
         { name: "Job List", path: "/" },
-        { name: "Login", path: "/admin" },
       ];
 
   return (
