@@ -7,10 +7,12 @@ const API = axios.create({
   baseURL: BASE_URL,
 });
 
+
 const initialToken = localStorage.getItem("access_token");
 if (initialToken) {
   API.defaults.headers.common["Authorization"] = `Bearer ${initialToken}`;
 }
+
 
 API.interceptors.request.use(
   (config) => {
