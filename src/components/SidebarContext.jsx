@@ -60,6 +60,7 @@ export const SidebarProvider = ({ children }) => {
         setIsHovered,
         setActiveItem,
         toggleSubmenu,
+        isMobile,
       }}
     >
       {children}

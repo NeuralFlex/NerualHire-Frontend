@@ -5,7 +5,6 @@ import { applyJob } from "../api/api";
 const ApplyForm = ({ jobId: propJobId }) => {
   const { id: routeJobId } = useParams();
   const jobId = propJobId || routeJobId;
-
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
