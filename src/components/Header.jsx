@@ -45,9 +45,7 @@ const Header = () => {
 
         {/* 2. Action Buttons (Pushed to the right) */}
         <div>
-          {!isAdmin ? ( // If NOT admin, show Login button
-            // Note: The original code used handleLogout which clears all storage 
-            // even when showing 'Login'. I've changed it to navigate directly.
+          {!isAdmin ? ( 
             <button
               onClick={() => navigate("/admin")} 
               className="bg-white text-[#D64948] px-4 py-1.5 rounded-lg font-medium hover:bg-gray-100 transition"

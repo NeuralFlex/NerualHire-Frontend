@@ -6,6 +6,7 @@ export default function Sidebar() {
   const {
     isExpanded,
     isMobileOpen,
+    isMobile, 
     toggleSidebar,
     toggleMobileSidebar,
     activeItem,
@@ -24,6 +25,15 @@ export default function Sidebar() {
     navigate("/admin");
   };
 
+  // 👇 New function to handle navigation clicks
+  const handleNavClick = (item) => {
+    setActiveItem(item.name);
+    // Automatically close the sidebar on mobile when navigating
+    if (isMobile) {
+      toggleMobileSidebar();
+    }
+  };
+
   const menuItems = isAdmin
     ? [
         { name: "Dashboard", path: "/dashboard" },
@@ -37,7 +47,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile (Correctly closes sidebar) */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-40 lg:hidden"
@@ -67,6 +77,20 @@ export default function Sidebar() {
               NeuralHire
             </span>
           )}
+
+          {/* 👇 NEW: Mobile Close Button (Visible when sidebar is open on mobile) */}
+          {isMobile && isMobileOpen && (
+              <button 
+                  onClick={toggleMobileSidebar}
+                  className="p-2 ml-auto text-gray-600 hover:text-gray-900 lg:hidden"
+                  aria-label="Close menu"
+              >
+                  {/* 'X' Close Icon */}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+              </button>
+          )}
         </div>
 
 
@@ -84,13 +108,14 @@ export default function Sidebar() {
                       : "text-gray-800 hover:bg-gray-100"
                   }`}
               >
-                {isExpanded ? item.name : item.name[0]}
+                {isExpanded ? item.name : item.name.slice(0, 1)}
               </button>
             ) : (
               <Link
                 key={item.name}
                 to={item.path}
-                onClick={() => setActiveItem(item.name)}
+                // 👇 Use the new handler here
+                onClick={() => handleNavClick(item)} 
                 className={`flex items-center px-4 py-3 mx-2 my-1 rounded-lg transition-colors
                   ${
                     activeItem === item.name || location.pathname === item.path
@@ -98,16 +123,16 @@ export default function Sidebar() {
                       : "text-gray-800 hover:bg-gray-100"
                   }`}
               >
-                {isExpanded ? item.name : item.name[0]}
+                {isExpanded ? item.name : item.name.slice(0, 1)}
               </Link>
             )
           )}
         </nav>
 
-        {/* Collapse Button */}
+        {/* Collapse Button - Hides on mobile/small screens for a cleaner look */}
         <button
           onClick={toggleSidebar}
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600"
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 lg:block hidden"
         >
           {isExpanded ? "<" : ">"}
         </button>
