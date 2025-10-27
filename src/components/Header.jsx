@@ -5,6 +5,7 @@ const Header = () => {
   const navigate = useNavigate();
   const role = localStorage.getItem("role");
   const isAdmin = role === "admin";
+
   const { 
     toggleMobileSidebar, 
     isMobileOpen,
@@ -17,13 +18,14 @@ const Header = () => {
     navigate("/admin");
   };
 
+  
   const desktopMargin = isExpanded ? "lg:ml-64" : "lg:ml-16";
 
   return (
     <header 
       className={`fixed top-0 right-0 h-16 bg-white border-b z-30 transition-all duration-300 w-full ${desktopMargin}`}
     >
-      <div className="px-6 flex justify-between items-center h-full"> 
+      <div className="px-6 flex justify-between items-center h-full"> {/* Changed justify-end to justify-between */}
         
         <button
             onClick={toggleMobileSidebar}
