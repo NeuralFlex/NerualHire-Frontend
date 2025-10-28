@@ -38,7 +38,6 @@ const JobDetail = () => {
     );
   }
 
-  // ✅ Improved bullet rendering
   const renderBullets = (text) => {
     return text
       .split(/\r?\n/)

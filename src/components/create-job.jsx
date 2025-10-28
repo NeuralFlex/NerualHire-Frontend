@@ -45,7 +45,7 @@ const CreateJobPage = () => {
     }));
   };
 
-  // ✅ Submit Job
+  //  Submit Job
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -61,7 +61,7 @@ const CreateJobPage = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setSuccess("✅ Job created successfully!");
+      setSuccess(" Job created successfully!");
       setFormData({
         title: "",
         company_details: "",
@@ -103,6 +103,7 @@ const CreateJobPage = () => {
             value={formData.title}
             onChange={handleChange}
             required
+            placeholder="Write Job title..."
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
@@ -141,12 +142,10 @@ const CreateJobPage = () => {
             value={formData.requirements}
             onChange={handleChange}
             rows="5"
-            placeholder={`Paste or write requirements (e.g.)\n• Proficient in Django\n• Good communication skills`}
+            placeholder={`Write requirements `}
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
-          <p className="text-xs text-gray-500 mt-1">
-            💡 You can press Enter for new lines or paste bullet points (•, -, *) — they’ll auto-format.
-          </p>
+          
         </div>
 
         {/* Benefits */}
@@ -157,7 +156,7 @@ const CreateJobPage = () => {
             value={formData.benefits}
             onChange={handleChange}
             rows="4"
-            placeholder={`Example:\n• Health insurance\n• Remote work`}
+            placeholder={`Write benefits / what we offer`}
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
         </div>
@@ -170,7 +169,7 @@ const CreateJobPage = () => {
             value={formData.responsibilities}
             onChange={handleChange}
             rows="4"
-            placeholder={`Example:\n• Build REST APIs\n• Collaborate with team`}
+            placeholder={`Write responsibilities`}
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
         </div>
