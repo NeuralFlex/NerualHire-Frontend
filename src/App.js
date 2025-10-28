@@ -9,6 +9,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import CandidatesPipeline from "./components/CandidatesPipeline";
 import CreateJobPage from "./components/create-job";
 
+
 function App() {
   return (
     <Router>
@@ -23,6 +24,7 @@ function App() {
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/dashboard" element={ <PrivateRoute> <Dashboard /> </PrivateRoute> }/>
           <Route path="/create-job" element={<PrivateRoute> <CreateJobPage /> </PrivateRoute>}/>
+           {/* <Route path="/edit-job/:id" element={<PrivateRoute> <CreateOrEditJobPage /></PrivateRoute>}/> */}
           <Route path="/candidates" element={<PrivateRoute> <CandidatesPipeline /> </PrivateRoute>}/>
         </Route>
       </Routes>
