@@ -38,12 +38,26 @@ const JobDetail = () => {
     );
   }
 
+  // ✅ Improved bullet rendering
+  const renderBullets = (text) => {
+    return text
+      .split(/\r?\n/)
+      .filter((line) => line.trim() !== "")
+      .map((line, index) => (
+        <li key={index} className="mb-1 leading-relaxed">
+          {line.trim().replace(/^[-•\s]*/, "")}
+        </li>
+      ));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10 flex justify-center">
       <div className="bg-white shadow-xl rounded-2xl p-8 max-w-3xl w-full space-y-6">
         {/* Job Header */}
         <div>
-          <h2 className="text-3xl font-bold text-[#D64948] mb-2">{job.title}</h2>
+          <h2 className="text-3xl font-bold text-[#D64948] mb-2">
+            {job.title}
+          </h2>
           <p
             className={`text-sm font-medium ${
               job.is_open ? "text-green-600" : "text-red-600"
@@ -54,32 +68,42 @@ const JobDetail = () => {
         </div>
 
         {/* Job Details */}
-        <div className="space-y-4 text-gray-700">
+        <div className="space-y-5 text-gray-700">
           {job.description && (
             <div>
-              <h4 className="font-semibold mb-1 text-gray-800">Description</h4>
-              <p className="leading-relaxed">{job.description}</p>
+              <h4 className="font-semibold mb-2 text-gray-800">Description</h4>
+              <p className="whitespace-pre-line leading-relaxed">
+                {job.description}
+              </p>
             </div>
           )}
 
           {job.requirements && (
             <div>
-              <h4 className="font-semibold mb-1 text-gray-800">Requirements</h4>
-              <p>{job.requirements}</p>
-            </div>
-          )}
-
-          {job.benefits && (
-            <div>
-              <h4 className="font-semibold mb-1 text-gray-800">Benefits</h4>
-              <p>{job.benefits}</p>
+              <h4 className="font-semibold mb-2 text-gray-800">Requirements</h4>
+              <ul className="list-disc list-inside text-gray-700">
+                {renderBullets(job.requirements)}
+              </ul>
             </div>
           )}
 
           {job.responsibilities && (
             <div>
-              <h4 className="font-semibold mb-1 text-gray-800">Responsibilities</h4>
-              <p>{job.responsibilities}</p>
+              <h4 className="font-semibold mb-2 text-gray-800">
+                Responsibilities
+              </h4>
+              <ul className="list-disc list-inside text-gray-700">
+                {renderBullets(job.responsibilities)}
+              </ul>
+            </div>
+          )}
+
+          {job.benefits && (
+            <div>
+              <h4 className="font-semibold mb-2 text-gray-800">Benefits</h4>
+              <ul className="list-disc list-inside text-gray-700">
+                {renderBullets(job.benefits)}
+              </ul>
             </div>
           )}
 
@@ -92,7 +116,8 @@ const JobDetail = () => {
 
           {job.type && (
             <p>
-              <span className="font-semibold text-[#D64948]">Job Type:</span> {job.type.replace("-", " ")}
+              <span className="font-semibold text-[#D64948]">Job Type:</span>{" "}
+              {job.type.replace("-", " ")}
             </p>
           )}
         </div>

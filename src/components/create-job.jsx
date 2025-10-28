@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../api/api"; 
+import API from "../api/api";
 
 const CreateJobPage = () => {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     title: "",
     company_details: "",
@@ -15,17 +16,36 @@ const CreateJobPage = () => {
     location: "",
     is_open: true,
   });
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // ✅ Handle Change — keeps newlines + formats pasted bullets
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+
+    // Keep newlines for typing normally
+    if (["requirements", "benefits", "responsibilities"].includes(name)) {
+      // Only apply formatting when pasting (not typing)
+      const formatted =
+        e.nativeEvent.inputType === "insertFromPaste"
+          ? value
+              .replace(/\r\n/g, "\n") // Normalize line breaks
+              .replace(/^\s*[-•*]\s*/gm, "• ") // Convert -, *, etc. to •
+              .trim()
+          : value;
+
+      setFormData((prev) => ({ ...prev, [name]: formatted }));
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   };
 
+  // ✅ Submit Job
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -38,12 +58,10 @@ const CreateJobPage = () => {
       });
 
       await API.post("jobs/", form, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setSuccess("Job created successfully!");
+      setSuccess("✅ Job created successfully!");
       setFormData({
         title: "",
         company_details: "",
@@ -76,7 +94,7 @@ const CreateJobPage = () => {
       {success && <p className="text-green-600 mb-4">{success}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Job Title */}
+        {/* Title */}
         <div>
           <label className="block font-medium mb-1">Job Title</label>
           <input
@@ -96,7 +114,9 @@ const CreateJobPage = () => {
             name="company_details"
             value={formData.company_details}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
+            rows="3"
+            placeholder="Write about the company..."
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
         </div>
 
@@ -107,7 +127,9 @@ const CreateJobPage = () => {
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
+            rows="4"
+            placeholder="Write job description here..."
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
         </div>
 
@@ -118,8 +140,13 @@ const CreateJobPage = () => {
             name="requirements"
             value={formData.requirements}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
+            rows="5"
+            placeholder={`Paste or write requirements (e.g.)\n• Proficient in Django\n• Good communication skills`}
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            💡 You can press Enter for new lines or paste bullet points (•, -, *) — they’ll auto-format.
+          </p>
         </div>
 
         {/* Benefits */}
@@ -129,7 +156,9 @@ const CreateJobPage = () => {
             name="benefits"
             value={formData.benefits}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
+            rows="4"
+            placeholder={`Example:\n• Health insurance\n• Remote work`}
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
         </div>
 
@@ -140,7 +169,9 @@ const CreateJobPage = () => {
             name="responsibilities"
             value={formData.responsibilities}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
+            rows="4"
+            placeholder={`Example:\n• Build REST APIs\n• Collaborate with team`}
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
         </div>
 
@@ -169,6 +200,7 @@ const CreateJobPage = () => {
             name="location"
             value={formData.location}
             onChange={handleChange}
+            placeholder="e.g. Dubai / Remote"
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
