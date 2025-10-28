@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import API from "../api/api";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import API, { fetchJob } from "../api/api";
 
-const EditJobPage = () => {
+const EditJob = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { id } = useParams(); // 👈 get job ID from URL
 
   const [formData, setFormData] = useState({
     title: "",
@@ -22,24 +22,33 @@ const EditJobPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ✅ Load existing job on mount
+  // ✅ Load existing job data
   useEffect(() => {
-    const fetchJob = async () => {
+    const loadJob = async () => {
       try {
-        const response = await API.get(`jobs/${id}/`);
-        setFormData(response.data);
+        const job = await fetchJob(id);
+        setFormData({
+          title: job.title || "",
+          company_details: job.company_details || "",
+          description: job.description || "",
+          requirements: job.requirements || "",
+          benefits: job.benefits || "",
+          responsibilities: job.responsibilities || "",
+          type: job.type || "full-time",
+          location: job.location || "",
+          is_open: job.is_open ?? true,
+        });
       } catch (err) {
-        console.error("Error fetching job:", err);
+        console.error("Failed to fetch job:", err);
         setError("Failed to load job details.");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchJob();
+    loadJob();
   }, [id]);
 
-  // ✅ Handle form changes (same as your Create page)
+  // ✅ Handle input changes (preserves multiline + bullet formatting)
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -62,29 +71,27 @@ const EditJobPage = () => {
     }));
   };
 
+  // ✅ Submit edited job
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
     try {
-      const form = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        form.append(key, value);
+      await API.put(`jobs/${id}/`, formData, {
+        headers: { "Content-Type": "application/json" },
       });
 
-      await API.put(`jobs/${id}/`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setSuccess(" Job updated successfully!");
+      setSuccess("Job updated successfully!");
       setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err) {
       console.error(err.response?.data || err);
-      setError(
-        err.response?.data?.detail ||
-          "Failed to update job. Please check your input."
-      );
+      const message =
+        err.response?.data?.title ||
+        err.response?.data?.type ||
+        JSON.stringify(err.response?.data) ||
+        "Failed to update job.";
+      setError(message);
     }
   };
 
@@ -113,7 +120,6 @@ const EditJobPage = () => {
             value={formData.title}
             onChange={handleChange}
             required
-            placeholder="Edit job title..."
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
@@ -126,7 +132,6 @@ const EditJobPage = () => {
             value={formData.company_details}
             onChange={handleChange}
             rows="3"
-            placeholder="Edit company details..."
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
         </div>
@@ -139,7 +144,6 @@ const EditJobPage = () => {
             value={formData.description}
             onChange={handleChange}
             rows="4"
-            placeholder="Edit job description..."
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
           />
         </div>
@@ -152,8 +156,8 @@ const EditJobPage = () => {
             value={formData.requirements}
             onChange={handleChange}
             rows="5"
-            placeholder="Edit requirements..."
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
+            placeholder="Each line will appear as a bullet point"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y whitespace-pre-line"
           />
         </div>
 
@@ -165,8 +169,8 @@ const EditJobPage = () => {
             value={formData.benefits}
             onChange={handleChange}
             rows="4"
-            placeholder="Edit benefits..."
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
+            placeholder="Each line will appear as a bullet point"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y whitespace-pre-line"
           />
         </div>
 
@@ -178,8 +182,8 @@ const EditJobPage = () => {
             value={formData.responsibilities}
             onChange={handleChange}
             rows="4"
-            placeholder="Edit responsibilities..."
-            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y"
+            placeholder="Each line will appear as a bullet point"
+            className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948] resize-y whitespace-pre-line"
           />
         </div>
 
@@ -208,7 +212,7 @@ const EditJobPage = () => {
             name="location"
             value={formData.location}
             onChange={handleChange}
-            placeholder="Edit location..."
+            placeholder="e.g. Dubai / Remote"
             className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#D64948]"
           />
         </div>
@@ -225,16 +229,16 @@ const EditJobPage = () => {
           <label className="font-medium">Open for Applications</label>
         </div>
 
-        {/* Submit */}
+        {/* Save Changes */}
         <button
           type="submit"
           className="w-full bg-[#D64948] hover:bg-[#b73837] text-white font-medium px-6 py-3 rounded-lg transition"
         >
-          Update Job
+          Save Changes
         </button>
       </form>
     </div>
   );
 };
 
-export default EditJobPage;
+export default EditJob;

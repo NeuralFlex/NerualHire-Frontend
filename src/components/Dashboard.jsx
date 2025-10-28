@@ -130,14 +130,19 @@ const Dashboard = () => {
                   >
                     {job.is_open ? "Close Job" : "Reopen Job"}
                   </button>
-
-
+                   <button
+                    onClick={() => navigate(`/edit-job/${job.id}`)}
+                    className="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm hover:bg-blue-200 transition"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDelete(job.id)}
                     className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300"
                   >
                     Delete
                   </button>
+                  
                 </div>
               </div>
             ))}
