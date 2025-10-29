@@ -12,6 +12,7 @@ const ApplyForm = ({ jobId: propJobId }) => {
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [experience, setExperience] = useState("");
   const fileInputRef = useRef(null);
 
   const handleSubmit = async (e) => {
@@ -28,6 +29,7 @@ const ApplyForm = ({ jobId: propJobId }) => {
     formData.append("email", email);
     formData.append("phone", phone);
     formData.append("resume", resume);
+    formData.append("experience", experience);
 
     try {
       const data = await applyJob(jobId, formData);
@@ -40,10 +42,11 @@ const ApplyForm = ({ jobId: propJobId }) => {
       setFullName("");
       setEmail("");
       setPhone("");
+      setExperience("");
       setResume(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
-      setMessage(err.message || "❌ Something went wrong. Try again.");
+      setMessage(err.message || " Something went wrong. Try again.");
       setShowModal(true);
     } finally {
       setIsSubmitting(false);
@@ -77,6 +80,13 @@ const ApplyForm = ({ jobId: propJobId }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-[#D64948] focus:outline-none"
+          />
+          <input
+            type="number"
+            placeholder="Years of Experience (optional)"
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
             className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:ring-2 focus:ring-[#D64948] focus:outline-none"
           />
           <input
