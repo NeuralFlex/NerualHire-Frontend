@@ -154,7 +154,7 @@ useEffect(() => {
 
       setAllApplications((prev) =>
         prev.map((a) => (a.id === app.id ? { ...a, stage: nextStage } : a))
-      ); // ✅ update global list
+      ); //  update global list
 
       setActiveStage(nextStage);
       setSelectedCandidate(null);
