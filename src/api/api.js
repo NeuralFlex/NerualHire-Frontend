@@ -1,22 +1,33 @@
 import axios from "axios";
 
-
 const BASE_URL = process.env.REACT_APP_API_URL;
 
+// Axios instance with baseURL
 const API = axios.create({
   baseURL: BASE_URL,
 });
 
+// Helpers
+const getAccessToken = () => localStorage.getItem("access_token");
+const getRefreshToken = () => localStorage.getItem("refresh_token");
 
-const initialToken = localStorage.getItem("access_token");
-if (initialToken) {
-  API.defaults.headers.common["Authorization"] = `Bearer ${initialToken}`;
-}
+const setAuthHeader = (token) => {
+  if (token) {
+    API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete API.defaults.headers.common["Authorization"];
+  }
+};
 
+// Initialize auth header if a token exists
+const initialToken = getAccessToken();
+if (initialToken) setAuthHeader(initialToken);
 
+// REQUEST INTERCEPTOR: ensure Authorization header is present
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
+    const token = getAccessToken();
+    config.headers = config.headers || {};
     if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,35 +36,33 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-
+// Refresh token queue handling
 let isRefreshing = false;
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error);
+    else resolve(token);
   });
   failedQueue = [];
 };
 
+// RESPONSE INTERCEPTOR: auto-refresh on 401
 API.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 Unauthorized and not retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        // Wait if a refresh is already happening
-        return new Promise(function (resolve, reject) {
+        // Wait for the refresh to complete
+        return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            originalRequest.headers["Authorization"] = "Bearer " + token;
+            originalRequest.headers = originalRequest.headers || {};
+            originalRequest.headers.Authorization = "Bearer " + token;
             return API(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -62,7 +71,7 @@ API.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = localStorage.getItem("refresh_token");
+      const refreshToken = getRefreshToken();
       if (!refreshToken) {
         console.warn("No refresh token found, logging out.");
         logoutUser();
@@ -70,19 +79,20 @@ API.interceptors.response.use(
       }
 
       try {
+        // Use plain axios for refresh (no interceptors)
         const { data } = await axios.post(`${BASE_URL}token/refresh/`, {
           refresh: refreshToken,
         });
-        const newAccess = data.access;
 
+        const newAccess = data.access;
         localStorage.setItem("access_token", newAccess);
-        API.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`;
+        setAuthHeader(newAccess);
 
         processQueue(null, newAccess);
         isRefreshing = false;
 
-        
-        originalRequest.headers["Authorization"] = "Bearer " + newAccess;
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = "Bearer " + newAccess;
         return API(originalRequest);
       } catch (err) {
         processQueue(err, null);
@@ -97,14 +107,14 @@ API.interceptors.response.use(
   }
 );
 
-
+// Public helpers
 export const setAuthToken = (token) => {
   if (token) {
     localStorage.setItem("access_token", token);
-    API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    setAuthHeader(token);
   } else {
     localStorage.removeItem("access_token");
-    delete API.defaults.headers.common["Authorization"];
+    setAuthHeader(null);
   }
 };
 
@@ -112,11 +122,11 @@ export const logoutUser = () => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem("role");
-  delete API.defaults.headers.common["Authorization"];
-  window.location.href = "/admin"; 
+  setAuthHeader(null);
+  window.location.href = "/admin";
 };
 
-// Login helper (used in AdminLogin)
+// Login helper
 export const login = async (username, password) => {
   const { data } = await API.post("token/", { username, password });
   const { access, refresh, role } = data;
@@ -125,43 +135,69 @@ export const login = async (username, password) => {
   localStorage.setItem("refresh_token", refresh);
   localStorage.setItem("role", role ? role.toLowerCase() : "");
 
-  API.defaults.headers.common["Authorization"] = `Bearer ${access}`;
-
+  setAuthHeader(access);
   return data;
 };
 
-// Fetch user role
+// Fetch user role (from localStorage)
 export const fetchUser = async () => {
   const role = (localStorage.getItem("role") || "").toLowerCase();
   return { role };
 };
 
-
+// Jobs
 export const fetchJobs = async () => {
-  const { data } = await axios.get(`${BASE_URL}jobs/`);
+  const { data } = await API.get("jobs/");
   return data;
 };
 
 export const fetchJob = async (id) => {
-  const { data } = await axios.get(`${BASE_URL}jobs/${id}/`);
+  const { data } = await API.get(`jobs/${id}/`);
   return data;
 };
 
-
-export const fetchApplications = async (url = null) => {
-  const endpoint = url ? url : `${BASE_URL}applications/`;
-  const { data } = await API.get(endpoint);
-   return data;
+// Applications
+// - Accepts either a full "next/previous" URL string OR a params object
+// - Params supported: { stage, job, page, page_size, search, ordering, ... }
+export const fetchApplications = async (arg = null) => {
+  if (typeof arg === "string" && arg) {
+    // Absolute URL from Django's pagination ("next" / "previous")
+    const { data } = await API.get(arg);
+    return data;
+  }
+  const params = arg || {};
+  const { data } = await API.get("applications/", { params });
+  return data;
 };
 
+// Fetch all pages across server pagination (optionally filtered)
+export const fetchAllApplications = async (params = {}) => {
+  let url = `${BASE_URL}applications/`;
+  const hasParams = params && Object.keys(params).length > 0;
+  if (hasParams) {
+    const usp = new URLSearchParams(params);
+    url = `${BASE_URL}applications/?${usp.toString()}`;
+  }
+
+  let all = [];
+  while (url) {
+    const { data } = await API.get(url);
+    const results = data.results || data;
+    all = all.concat(results);
+    url = data.next || null;
+  }
+  return all;
+};
+
+// Update a single application stage
 export const updateApplicationStage = async (id, stage) => {
   const { data } = await API.patch(`applications/${id}/`, { stage });
   return data;
 };
 
-
+// Apply to a job (multipart)
 export const applyJob = async (id, formData) => {
-  const { data } = await axios.post(`${BASE_URL}jobs/${id}/apply/`, formData, {
+  const { data } = await API.post(`jobs/${id}/apply/`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
