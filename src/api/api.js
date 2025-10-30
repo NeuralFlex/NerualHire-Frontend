@@ -148,9 +148,10 @@ export const fetchJob = async (id) => {
 };
 
 
-export const fetchApplications = async () => {
-  const { data } = await API.get("applications/");
-  return data.results || data; 
+export const fetchApplications = async (url = null) => {
+  const endpoint = url ? url : `${BASE_URL}applications/`;
+  const { data } = await API.get(endpoint);
+   return data;
 };
 
 export const updateApplicationStage = async (id, stage) => {
