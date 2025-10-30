@@ -132,6 +132,7 @@ const loadApplications = useCallback(async (url = null) => {
 
 useEffect(() => {
   loadApplications();
+
 }, [jobId]);
 
 // When stage changes, just update the selected candidate locally
