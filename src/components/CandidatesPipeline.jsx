@@ -140,20 +140,6 @@ useEffect(() => {
   setSelectedCandidate(filtered[0] || null);
 }, [activeStage, applications]);
 
-  // ✅ Shared function to update stage both locally & globally
-  const updateStageEverywhere = (id, newStage) => {
-    setApplications((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, stage: newStage } : a))
-    );
-    setAllApplications((prev) => {
-      const exists = prev.find((a) => a.id === id);
-      if (exists) {
-        return prev.map((a) => (a.id === id ? { ...a, stage: newStage } : a));
-      }
-      return [...prev, { id, stage: newStage }];
-    });
-  };
-
   const moveToNextStage = async (app) => {
     const currentIndex = PIPELINE_STAGES.indexOf(app.stage);
     if (currentIndex === -1 || currentIndex >= PIPELINE_STAGES.length - 1) return;
