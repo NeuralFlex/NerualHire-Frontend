@@ -132,8 +132,9 @@ const loadApplications = useCallback(async (url = null) => {
 
 useEffect(() => {
   loadApplications();
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [jobId]);
+
 
 // When stage changes, just update the selected candidate locally
 useEffect(() => {
