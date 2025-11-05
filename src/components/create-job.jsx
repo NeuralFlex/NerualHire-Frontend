@@ -19,6 +19,7 @@ const CreateJobPage = () => {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // ✅ Handle Change — keeps newlines + formats pasted bullets
   const handleChange = (e) => {
@@ -50,6 +51,8 @@ const CreateJobPage = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    setIsLoading(true);
 
     try {
       const form = new FormData();
@@ -83,7 +86,11 @@ const CreateJobPage = () => {
         JSON.stringify(err.response?.data) ||
         "Failed to create job. Please check your input.";
       setError(message);
+    }finally {
+      // 3. STOP LOADING, ensuring the button is re-enabled after success or error
+      setIsLoading(false);
     }
+    
   };
 
   return (
@@ -219,9 +226,11 @@ const CreateJobPage = () => {
         {/* Submit */}
         <button
           type="submit"
+          disabled={isLoading}
           className="w-full bg-[#D64948] hover:bg-[#b73837] text-white font-medium px-6 py-3 rounded-lg transition"
         >
-          Create Job
+          {/* Change text based on loading state */}
+          {isLoading ? "Creating Job..." : "Create Job"}
         </button>
       </form>
     </div>
