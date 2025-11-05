@@ -7,10 +7,13 @@ const AdminLogin = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
     try {
       const response = await api.post("token/", { username, password });
       const { access, refresh, role } = response.data;
@@ -25,6 +28,9 @@ const AdminLogin = () => {
     } catch (err) {
       console.error("Login error:", err);
       setError("Invalid credentials. Please try again.");
+    }finally {
+      // 3. Stop the loading state after the try/catch blocks complete
+      setIsLoading(false);
     }
   };
 
@@ -75,9 +81,11 @@ const AdminLogin = () => {
 
           <button
             type="submit"
+            disabled={isLoading}
             className="w-full bg-[#D64948] text-white py-2.5 rounded-lg font-medium hover:bg-[#b73837] transition"
           >
-            Login
+            {/* 5. Change button text based on loading state */}
+            {isLoading ? "Loging In..." : "Login"}
           </button>
         </form>
       </div>

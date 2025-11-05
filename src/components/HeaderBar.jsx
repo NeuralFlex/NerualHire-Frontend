@@ -27,10 +27,11 @@ const HeaderBar = ({ jobTitle, location, totalCandidates }) => {
         )}
       </div>
 
-      <button className="flex items-center px-4 py-2 bg-[#D64948] text-white font-medium rounded-lg shadow-md hover:bg-[#b73837] transition">
+{/* Add Candidates button */}
+      {/* <button className="flex items-center px-4 py-2 bg-[#D64948] text-white font-medium rounded-lg shadow-md hover:bg-[#b73837] transition">
         Add Candidates
         <FaChevronDown className="ml-2" size={12} />
-      </button>
+      </button> */}
     </div>
   );
 };
