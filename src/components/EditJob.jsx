@@ -21,6 +21,8 @@ const EditJob = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  // 1. ADD NEW STATE FOR SUBMISSION PROGRESS
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
   // ✅ Load existing job data
   useEffect(() => {
@@ -77,6 +79,9 @@ const EditJob = () => {
     setError("");
     setSuccess("");
 
+    // 2. START SUBMITTING STATE
+    setIsSubmitting(true);
+
     try {
       await API.put(`jobs/${id}/`, formData, {
         headers: { "Content-Type": "application/json" },
@@ -92,6 +97,9 @@ const EditJob = () => {
         JSON.stringify(err.response?.data) ||
         "Failed to update job.";
       setError(message);
+    } finally {
+      // 3. STOP SUBMITTING STATE
+      setIsSubmitting(false);
     }
   };
 
@@ -229,12 +237,15 @@ const EditJob = () => {
           <label className="font-medium">Open for Applications</label>
         </div>
 
-        {/* Save Changes */}
+        {/* Save Changes Button */}
         <button
           type="submit"
-          className="w-full bg-[#D64948] hover:bg-[#b73837] text-white font-medium px-6 py-3 rounded-lg transition"
+          // 4. Disable button when submitting
+          disabled={isSubmitting} 
+          className="w-full bg-[#D64948] hover:bg-[#b73837] text-white font-medium px-6 py-3 rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed"
         >
-          Save Changes
+          {/* 5. Change text based on state */}
+          {isSubmitting ? "Saving Changes..." : "Save Changes"}
         </button>
       </form>
     </div>
