@@ -60,12 +60,12 @@ async function fetchAllApplicationsAcrossPages(jobId = null) {
 export default function CandidatesPipeline() {
   const location = useLocation();
   const jobId = location.state?.jobId != null ? Number(location.state.jobId) : null;
-
   const [allApplications, setAllApplications] = useState([]); // single source of truth
   const [loading, setLoading] = useState(true);
   const [activeStage, setActiveStage] = useState("applied");
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [jobTitle, setJobTitle] = useState("Candidate Pipeline");
+  const [isUpdatingStageId, setIsUpdatingStageId] = useState(null);
 
   // client-side pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -133,7 +133,7 @@ export default function CandidatesPipeline() {
         }
       } catch (err) {
         console.error("Error loading applications:", err);
-      } finally {
+      }finally {
         if (!cancelled) setLoading(false);
       }
     }
@@ -201,7 +201,7 @@ export default function CandidatesPipeline() {
     const currentIndex = PIPELINE_STAGES.indexOf(app.stage);
     if (currentIndex === -1 || currentIndex >= PIPELINE_STAGES.length - 1) return;
     const nextStage = PIPELINE_STAGES[currentIndex + 1];
-
+    setIsUpdatingStageId(app.id);
     try {
       await updateApplicationStage(app.id, nextStage);
       const updatedAll = allApplications.map((a) =>
@@ -211,6 +211,8 @@ export default function CandidatesPipeline() {
       jumpToCandidatePageInStage(app.id, nextStage, updatedAll);
     } catch (err) {
       console.error("Failed to move stage:", err);
+    }finally {
+      setIsUpdatingStageId(null); // Stop loading
     }
   };
 
@@ -218,7 +220,7 @@ export default function CandidatesPipeline() {
     const currentIndex = PIPELINE_STAGES.indexOf(app.stage);
     if (currentIndex <= 0) return;
     const prevStage = PIPELINE_STAGES[currentIndex - 1];
-
+    setIsUpdatingStageId(app.id);
     try {
       await updateApplicationStage(app.id, prevStage);
       const updatedAll = allApplications.map((a) =>
@@ -228,10 +230,13 @@ export default function CandidatesPipeline() {
       jumpToCandidatePageInStage(app.id, prevStage, updatedAll);
     } catch (err) {
       console.error("Failed to move stage:", err);
+    }finally {
+      setIsUpdatingStageId(null); // Stop loading
     }
   };
 
   const handleDisqualify = async (candidate) => {
+    setIsUpdatingStageId(candidate.id);
     try {
       await updateApplicationStage(candidate.id, "rejected");
       const updatedAll = allApplications.map((a) =>
@@ -241,10 +246,13 @@ export default function CandidatesPipeline() {
       jumpToCandidatePageInStage(candidate.id, "rejected", updatedAll);
     } catch (err) {
       console.error("Failed to disqualify candidate:", err);
+    }finally {
+      setIsUpdatingStageId(null); // Stop loading
     }
   };
 
   const handleRestoreCandidate = async (candidate) => {
+    setIsUpdatingStageId(candidate.id);
     try {
       await updateApplicationStage(candidate.id, "applied");
       const updatedAll = allApplications.map((a) =>
@@ -254,6 +262,8 @@ export default function CandidatesPipeline() {
       jumpToCandidatePageInStage(candidate.id, "applied", updatedAll);
     } catch (err) {
       console.error("Failed to restore candidate:", err);
+    }finally {
+      setIsUpdatingStageId(null); // Stop loading
     }
   };
 
@@ -341,6 +351,7 @@ export default function CandidatesPipeline() {
               onDisqualify={handleDisqualify}
               setActiveStage={handleSetActiveStage}
               onRestoreCandidate={handleRestoreCandidate}
+              isUpdating={isUpdatingStageId === selectedCandidate.id}
             />
           ) : (
             <div className="text-center p-10 text-gray-500">
