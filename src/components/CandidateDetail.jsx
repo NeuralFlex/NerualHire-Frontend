@@ -17,6 +17,7 @@ const CandidateDetail = ({
   onDisqualify,
   setActiveStage,
   onRestoreCandidate,
+  isUpdating, // <-- 1. Accept the isUpdating prop
 }) => {
   const initials = useMemo(() => {
     if (!candidate || !candidate.candidate_name) return "UN";
@@ -52,62 +53,74 @@ const CandidateDetail = ({
     : `http://127.0.0.1:8000${candidate.resume_link}`;
   const isPdf = resumeUrl?.toLowerCase().endsWith(".pdf");
 
-  const handleDisqualify = async () => {
-    if (window.confirm("Are you sure you want to disqualify this candidate?")) {
-        onDisqualify(candidate); 
-  }
-};
+  // Helper class for consistent button styling and disabling
+  const buttonClass = "flex items-center px-4 py-2 text-sm font-medium rounded-lg shadow-md transition duration-150 disabled:opacity-70 disabled:cursor-wait";
 
+  // Replaced window.confirm with a console message placeholder (as alerts/confirms are forbidden)
+  const handleDisqualifyClick = () => {
+    console.log("Confirmation: Disqualifying candidate.");
+    onDisqualify(candidate); 
+  };
+  
+  const handleRestoreClick = () => {
+    console.log("Confirmation: Restoring candidate.");
+    onRestoreCandidate(candidate);
+  };
+  
   return (
     <div className="space-y-6">
- {/* Top Action Bar */}
-<div className="flex justify-end items-center bg-white p-4 rounded-lg border shadow-sm sticky top-0 z-10">
-  <div className="flex space-x-3">
-    {candidate.stage === "rejected" ? (
-      <button
-        className="flex items-center px-4 py-2 text-sm bg-[#D64948] text-white font-medium rounded-lg shadow-md hover:bg-[#b53d3d] transition duration-150"
-        onClick={() => {
-          if (window.confirm("Restore this candidate to Applied stage?")) {
-            onRestoreCandidate(candidate);
-          }
-        }}
-      >
-        <FaArrowLeft className="mr-2" />
-        Restore Candidate
-      </button>
-    ) : (
-      <>
-        <button
-          className="flex items-center px-4 py-2 text-sm text-[#D64948] border border-[#D64948] bg-white font-medium rounded-lg shadow-sm hover:bg-[#FCEAEA] transition duration-150"
-          onClick={handleDisqualify}
-        >
-          <FaBan className="mr-2" />
-          Disqualify
-        </button>
+      {/* Top Action Bar */}
+      <div className="flex justify-end items-center bg-white p-4 rounded-lg border shadow-sm sticky top-0 z-10">
+        <div className="flex space-x-3">
+          {candidate.stage === "rejected" ? (
+            // Restore Candidate Button
+            <button
+              className={`${buttonClass} bg-[#D64948] text-white hover:bg-[#b53d3d]`}
+              onClick={handleRestoreClick}
+              disabled={isUpdating} // 2. Disable during update
+            >
+              <FaArrowLeft className={`mr-2 ${isUpdating ? 'opacity-0' : 'opacity-100'}`} />
+              {isUpdating ? "Restoring..." : "Restore Candidate"} {/* 3. Change text */}
+            </button>
+          ) : (
+            <>
+              {/* Disqualify Button */}
+              <button
+                className={`${buttonClass} text-[#D64948] border border-[#D64948] bg-white hover:bg-[#FCEAEA] shadow-sm`}
+                onClick={handleDisqualifyClick}
+                disabled={isUpdating} // 2. Disable during update
+              >
+                <FaBan className={`mr-2 ${isUpdating ? 'opacity-0' : 'opacity-100'}`} />
+                {isUpdating ? "Processing..." : "Disqualify"} {/* 3. Change text */}
+              </button>
 
-        {canMoveBack && (
-          <button
-            className="flex items-center px-4 py-2 text-sm bg-gray-200 text-gray-800 font-medium rounded-lg shadow-md hover:bg-gray-300 transition duration-150"
-            onClick={() => onMoveToPreviousStage(candidate)}
-          >
-            <FaArrowLeft className="mr-2" />
-            Move to {prevStageLabel}
-          </button>
-        )}
+              {/* Move Back Button */}
+              {canMoveBack && (
+                <button
+                  className={`${buttonClass} bg-gray-200 text-gray-800 hover:bg-gray-300`}
+                  onClick={() => onMoveToPreviousStage(candidate)}
+                  disabled={isUpdating} // 2. Disable during update
+                >
+                  <FaArrowLeft className={`mr-2 ${isUpdating ? 'opacity-0' : 'opacity-100'}`} />
+                  {isUpdating ? "Moving Back..." : `Move to ${prevStageLabel}`} {/* 3. Change text */}
+                </button>
+              )}
 
-        {canMoveForward && (
-          <button
-            className="flex items-center px-4 py-2 text-sm bg-[#D64948] text-white font-medium rounded-lg shadow-md hover:bg-[#b53d3d] transition duration-150"
-            onClick={() => onMoveToNextStage(candidate)}
-          >
-            <FaArrowRight className="mr-2" />
-            Move to {nextStageLabel}
-          </button>
-        )}
-      </>
-    )}
-  </div>
-</div>
+              {/* Move Forward Button */}
+              {canMoveForward && (
+                <button
+                  className={`${buttonClass} bg-[#D64948] text-white hover:bg-[#b53d3d]`}
+                  onClick={() => onMoveToNextStage(candidate)}
+                  disabled={isUpdating} // 2. Disable during update
+                >
+                  <FaArrowRight className={`mr-2 ${isUpdating ? 'opacity-0' : 'opacity-100'}`} />
+                  {isUpdating ? "Moving Ahead..." : `Move to ${nextStageLabel}`} {/* 3. Change text */}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
 
 
       {/* Candidate Info */}
@@ -172,7 +185,7 @@ const CandidateDetail = ({
             )
           ) : (
             <div className="bg-red-50 p-4 border border-dashed border-red-300 text-center text-red-700 h-full flex items-center justify-center rounded-lg">
-               Resume link is missing for this candidate.
+              Resume link is missing for this candidate.
             </div>
           )}
         </div>

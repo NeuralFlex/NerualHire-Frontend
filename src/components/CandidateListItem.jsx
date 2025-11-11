@@ -1,24 +1,30 @@
 import React from "react";
 import { FaEnvelope, FaPhoneAlt, FaFileAlt } from "react-icons/fa";
 
-const CandidateListItem = ({ candidate, isSelected, onClick }) => {
+const CandidateListItem = ({
+  candidate,
+  isSelected,
+  onClick,
+  isUpdating // 1. ACCEPT THE NEW PROP
+}) => {
   const initials = candidate.candidate_name
     ? candidate.candidate_name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .substring(0, 2)
-        .toUpperCase()
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase()
     : "??";
 
   return (
     <div
-      onClick={onClick}
-      className={`flex items-start p-4 border-b cursor-pointer transition-all duration-150 relative ${
-        isSelected
+      onClick={isUpdating ? undefined : onClick} // 2. CONDITIONAL CLICK HANDLER
+      className={`flex items-start p-4 border-b transition-all duration-150 relative ${isSelected
           ? "bg-[#FFF5F5] border-l-4 border-[#D64948]"
           : "bg-white hover:bg-gray-50 border-l-4 border-transparent"
-      }`}
+        } 
+        ${isUpdating ? 'opacity-50 cursor-default pointer-events-none' : 'cursor-pointer'}
+      `}
     >
       {/* Checkbox */}
       <input

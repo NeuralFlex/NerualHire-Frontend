@@ -2,7 +2,12 @@ import React from "react";
 import { FaSearch, FaFilter, FaSortAmountDown } from "react-icons/fa";
 import CandidateListItem from "./CandidateListItem";
 
-const CandidateList = ({ candidates, selectedCandidate, onSelectCandidate }) => {
+const CandidateList = ({
+  candidates,
+  selectedCandidate,
+  onSelectCandidate,
+  isUpdatingStageId // 1. ACCEPT THE LOADING ID PROP
+}) => {
   return (
     <div className="h-full flex flex-col bg-white border rounded-lg shadow-sm">
       {/* Search and Filter Bar */}
@@ -35,6 +40,8 @@ const CandidateList = ({ candidates, selectedCandidate, onSelectCandidate }) => 
               candidate={candidate}
               isSelected={selectedCandidate && selectedCandidate.id === candidate.id}
               onClick={() => onSelectCandidate(candidate)}
+              // 2. PASS THE CALCULATED isUpdating PROP DOWN
+              isUpdating={isUpdatingStageId === candidate.id}
             />
           ))
         ) : (
