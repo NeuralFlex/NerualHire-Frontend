@@ -184,18 +184,18 @@ export default function CandidatesPipeline() {
     [allApplications, jobId]
   );
 
-  const jumpToCandidatePageInStage = useCallback(
-    (candidateId, stage, updatedAll) => {
-      const list = getSortedStageList(updatedAll, stage, jobId);
-      const idx = list.findIndex((c) => c.id === candidateId);
-      const page = idx === -1 ? 1 : Math.floor(idx / PAGE_SIZE) + 1;
-      setActiveStage(stage);
-      setCurrentPage(page);
-      const updatedCand = updatedAll.find((a) => a.id === candidateId) || null;
-      setSelectedCandidate(updatedCand);
-    },
-    [jobId]
-  );
+  // const jumpToCandidatePageInStage = useCallback(
+  //   (candidateId, stage, updatedAll) => {
+  //     const list = getSortedStageList(updatedAll, stage, jobId);
+  //     const idx = list.findIndex((c) => c.id === candidateId);
+  //     const page = idx === -1 ? 1 : Math.floor(idx / PAGE_SIZE) + 1;
+  //     setActiveStage(stage);
+  //     setCurrentPage(page);
+  //     const updatedCand = updatedAll.find((a) => a.id === candidateId) || null;
+  //     setSelectedCandidate(updatedCand);
+  //   },
+  //   [jobId]
+  // );
 
   const moveToNextStage = async (app) => {
     const currentIndex = PIPELINE_STAGES.indexOf(app.stage);
@@ -208,7 +208,7 @@ export default function CandidatesPipeline() {
         a.id === app.id ? { ...a, stage: nextStage } : a
       );
       setAllApplications(updatedAll);
-      jumpToCandidatePageInStage(app.id, nextStage, updatedAll);
+      // jumpToCandidatePageInStage(app.id, nextStage, updatedAll);
     } catch (err) {
       console.error("Failed to move stage:", err);
     }finally {
@@ -227,7 +227,7 @@ export default function CandidatesPipeline() {
         a.id === app.id ? { ...a, stage: prevStage } : a
       );
       setAllApplications(updatedAll);
-      jumpToCandidatePageInStage(app.id, prevStage, updatedAll);
+      // jumpToCandidatePageInStage(app.id, prevStage, updatedAll);
     } catch (err) {
       console.error("Failed to move stage:", err);
     }finally {
@@ -243,7 +243,7 @@ export default function CandidatesPipeline() {
         a.id === candidate.id ? { ...a, stage: "rejected" } : a
       );
       setAllApplications(updatedAll);
-      jumpToCandidatePageInStage(candidate.id, "rejected", updatedAll);
+      // jumpToCandidatePageInStage(candidate.id, "rejected", updatedAll);
     } catch (err) {
       console.error("Failed to disqualify candidate:", err);
     }finally {
@@ -259,7 +259,7 @@ export default function CandidatesPipeline() {
         a.id === candidate.id ? { ...a, stage: "applied" } : a
       );
       setAllApplications(updatedAll);
-      jumpToCandidatePageInStage(candidate.id, "applied", updatedAll);
+      // jumpToCandidatePageInStage(candidate.id, "applied", updatedAll);
     } catch (err) {
       console.error("Failed to restore candidate:", err);
     }finally {
