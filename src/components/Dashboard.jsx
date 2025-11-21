@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [updatingJobId, setupdatingJobId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,6 +63,10 @@ const Dashboard = () => {
   };
 
   const handleToggleStatus = async (jobId, isOpen) => {
+    const action = isOpen ? "close" : "reopen";
+    if (!window.confirm(`Are you sure you want to ${action} this job?`)) return;
+
+    setupdatingJobId(jobId);// loading state
     try {
       const endpoint = isOpen ? `jobs/${jobId}/close/` : `jobs/${jobId}/open/`;
       await API.patch(endpoint);
@@ -73,11 +78,12 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Failed to update job status:", err);
       alert("Failed to update job status.");
+    } finally {
+      setupdatingJobId(null);//stop loading state
     }
 
   };
 
-  //  LOADING STATE (Now using refined Skeleton Loader) ---
   if (loading)
     return (
       <div className="space-y-8 p-6">
@@ -125,68 +131,79 @@ const Dashboard = () => {
 
         {jobs.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-6">
-            {jobs.map((job) => (
-              <div
-                key={job.id}
-                // Card Hover is now more pronounced and smooth
-                className="bg-white rounded-xl border border-gray-100 shadow-md transition duration-300 hover:shadow-xl hover:translate-y-[-2px] p-6"
-              >
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-bold text-[#C23D3D]">
-                    {job.title}
-                  </h3>
-                  <span
-                    className={`px-3 py-1 text-xs rounded-full font-semibold border ${job.is_open
-                      ? "bg-green-50 text-green-700 border-green-200"
-                      : "bg-red-50 text-red-700 border-red-200"
-                      }`}
-                  >
-                    {job.is_open ? "Open" : "Closed"}
-                  </span>
+            {jobs.map((job) => {
+              const isUpdating = updatingJobId === job.id;
+              return (
+                <div
+                  key={job.id}
+                  // Card Hover is now more pronounced and smooth
+                  className="bg-white rounded-xl border border-gray-100 shadow-md transition duration-300 hover:shadow-xl hover:translate-y-[-2px] p-6"
+                >
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-bold text-[#C23D3D]">
+                      {job.title}
+                    </h3>
+                    <span
+                      className={`px-3 py-1 text-xs rounded-full font-semibold border ${job.is_open
+                        ? "bg-green-50 text-green-700 border-green-200"
+                        : "bg-red-50 text-red-700 border-red-200"
+                        }`}
+                    >
+                      {job.is_open ? "Open" : "Closed"}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-600 line-clamp-2 leading-relaxed">
+                    {job.description?.substring(0, 100)}...
+                  </p>
+                  <p className="text-sm text-gray-500 mt-3 font-medium">
+                    Location: {job.location || "N/A"}
+                  </p>
+
+                  <div className="mt-6 flex gap-3 flex-wrap border-t pt-4 border-gray-100">
+                    {/* Buttons: Added more distinct hover/focus states */}
+                    <button
+                      onClick={() => navigate("/candidates", { state: { jobId: job.id } })}
+                      className="bg-[#C23D3D] px-4 py-2 text-white rounded-lg text-sm font-medium transition duration-150 hover:bg-[#a13131] hover:shadow-md"
+                    >
+                      View Candidates
+                    </button>
+
+                    <button
+                      onClick={() => handleToggleStatus(job.id, job.is_open)}
+                      disabled={isUpdating} //disable button while loading
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition
+                        ${isUpdating
+                          ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                          : job.is_open
+                            ? "bg-gray-400 text-white hover:bg-gray-500"
+                            : "bg-[#6B7280] text-white hover:bg-[#14B8A7]]"
+                        }`}
+                    >
+                      {isUpdating ? (
+                        <>
+                          {job.is_open ? "Closing..." : "Reopening..."}
+                        </>
+                      ) : (
+                        job.is_open ? "Close Job" : "Reopen Job"
+                      )}
+                    </button>
+                    <button
+                      onClick={() => navigate(`/edit-job/${job.id}`)}
+                      className="text-blue-700 px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 hover:bg-blue-50 transition duration-150"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(job.id)}
+                      className="text-red-700 px-4 py-2 rounded-lg text-sm font-medium border border-red-200 hover:bg-red-50 transition duration-150"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-
-                <p className="text-gray-600 line-clamp-2 leading-relaxed">
-                  {job.description?.substring(0, 100)}...
-                </p>
-                <p className="text-sm text-gray-500 mt-3 font-medium">
-                  Location: {job.location || "N/A"}
-                </p>
-
-                <div className="mt-6 flex gap-3 flex-wrap border-t pt-4 border-gray-100">
-                  {/* Buttons: Added more distinct hover/focus states */}
-                  <button
-                    onClick={() => navigate("/candidates", { state: { jobId: job.id } })}
-                    className="bg-[#C23D3D] px-4 py-2 text-white rounded-lg text-sm font-medium transition duration-150 hover:bg-[#a13131] hover:shadow-md"
-                  >
-                    View Candidates
-                  </button>
-
-                  <button
-                    onClick={() => handleToggleStatus(job.id, job.is_open)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition
-                        ${job.is_open
-                        ? "bg-gray-400 text-white hover:bg-gray-500"
-                        : "bg-[#6B7280] text-white hover:bg-[#14B8A7]]"
-                      }`}
-                  >
-                    {job.is_open ? "Close Job" : "Reopen Job"}
-                  </button>
-                  <button
-                    onClick={() => navigate(`/edit-job/${job.id}`)}
-                    className="text-blue-700 px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 hover:bg-blue-50 transition duration-150"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(job.id)}
-                    className="text-red-700 px-4 py-2 rounded-lg text-sm font-medium border border-red-200 hover:bg-red-50 transition duration-150"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-10 bg-white rounded-xl shadow-md">
