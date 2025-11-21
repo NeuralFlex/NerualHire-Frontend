@@ -109,12 +109,7 @@ const Dashboard = () => {
 
         {jobs.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-6">
-            {jobs.map((job) => {
-              const progressPercentage = job.total_candidates
-                ? Math.round((job.candidates_in_review / job.total_candidates) * 100)
-                : 0;
-
-              return (
+            {jobs.map((job) => (
                 <div
                   key={job.id}
                   // Card Hover is now more pronounced and smooth
@@ -124,7 +119,6 @@ const Dashboard = () => {
                     <h3 className="text-lg font-bold text-[#C23D3D]">
                       {job.title}
                     </h3>
-                    {/* Status Tag Polish */}
                     <span
                       className={`px-3 py-1 text-xs rounded-full font-semibold border ${job.is_open
                           ? "bg-green-50 text-green-700 border-green-200"
@@ -174,8 +168,8 @@ const Dashboard = () => {
                     </button>
                   </div>
                 </div>
-              );
-            })}
+              
+            ))}
           </div>
         ) : (
           <div className="text-center py-10 bg-white rounded-xl shadow-md">
