@@ -120,28 +120,18 @@ export default function Sidebar() {
               <button
                 key={item.name}
                 onClick={item.action}
-                className={`flex items-center w-full text-left px-4 py-3 mx-2 my-1 rounded-lg transition-colors
-                  ${
-                    activeItem === item.name
-                      ? "bg-[#D64948] text-white font-semibold"
-                      : "text-gray-800 hover:bg-gray-100"
-                  }`}
+                className={itemClasses}
               >
-                {isExpanded ? item.name : item.name.slice(0, 1)}
+                {content}
               </button>
             ) : (
               <Link
                 key={item.name}
                 to={item.path}
                 onClick={() => handleNavClick(item)} 
-                className={`flex items-center px-4 py-3 mx-2 my-1 rounded-lg transition-colors
-                  ${
-                    activeItem === item.name || location.pathname === item.path
-                      ? "bg-[#D64948] text-white font-semibold"
-                      : "text-gray-800 hover:bg-gray-100"
-                  }`}
+                className={itemClasses}
               >
-                {isExpanded ? item.name : item.name.slice(0, 1)}
+                {content}
               </Link>
             )
 })}
