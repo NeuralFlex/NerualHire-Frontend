@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { fetchJobs } from "../api/api";
 import { useNavigate } from "react-router-dom";
 
-
 const KpiCard = ({ title, value, icon, colorClass = 'text-[#C23D3D]' }) => (
   <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-6 transition-all duration-300 hover:shadow-2xl">
     <div className="flex items-start justify-between">
@@ -18,10 +17,6 @@ const KpiCard = ({ title, value, icon, colorClass = 'text-[#C23D3D]' }) => (
   </div>
 );
 
-/**
- * 2. REFINED Skeleton Loader Component
- * - Uses subtle gray shades for a smoother animation.
- */
 const JobCardSkeleton = () => (
   <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6 animate-pulse">
     <div className="h-4 bg-gray-300 rounded w-3/4 mb-4"></div>
@@ -56,8 +51,6 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-
 
   const handleDelete = async (jobId) => {
     if (!window.confirm("Are you sure you want to delete this job?")) return;
