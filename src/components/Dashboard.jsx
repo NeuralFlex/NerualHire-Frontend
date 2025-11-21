@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchJobs } from "../api/api";
 import { useNavigate } from "react-router-dom";
+import API from "../api/api";
 
 const KpiCard = ({ title, value, icon, colorClass = 'text-[#C23D3D]' }) => (
   <div className="bg-white shadow-xl rounded-xl border border-gray-100 p-6 transition-all duration-300 hover:shadow-2xl">
@@ -27,10 +28,7 @@ const JobCardSkeleton = () => (
   </div>
 );
 
-// --- END: REFINED UI Helper Components ---
-
 const Dashboard = () => {
-  // ... (State and API functions remain unchanged) ...
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -54,14 +52,32 @@ const Dashboard = () => {
 
   const handleDelete = async (jobId) => {
     if (!window.confirm("Are you sure you want to delete this job?")) return;
-    // ... (delete logic)
+    try {
+      await API.delete(`jobs/${jobId}/`);
+      setJobs(jobs.filter((job) => job.id !== jobId));
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete job. Try again.");
+    }
   };
 
   const handleToggleStatus = async (jobId, isOpen) => {
-    // ... (toggle logic)
+    try {
+      const endpoint = isOpen ? `jobs/${jobId}/close/` : `jobs/${jobId}/open/`;
+      await API.patch(endpoint);
+      setJobs(
+        jobs.map((job) =>
+          job.id === jobId ? { ...job, is_open: !isOpen } : job
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update job status:", err);
+      alert("Failed to update job status.");
+    }
+
   };
 
-  // --- LOADING STATE (Now using refined Skeleton Loader) ---
+  //  LOADING STATE (Now using refined Skeleton Loader) ---
   if (loading)
     return (
       <div className="space-y-8 p-6">
@@ -110,65 +126,66 @@ const Dashboard = () => {
         {jobs.length > 0 ? (
           <div className="grid md:grid-cols-2 gap-6">
             {jobs.map((job) => (
-                <div
-                  key={job.id}
-                  // Card Hover is now more pronounced and smooth
-                  className="bg-white rounded-xl border border-gray-100 shadow-md transition duration-300 hover:shadow-xl hover:translate-y-[-2px] p-6"
-                >
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold text-[#C23D3D]">
-                      {job.title}
-                    </h3>
-                    <span
-                      className={`px-3 py-1 text-xs rounded-full font-semibold border ${job.is_open
-                          ? "bg-green-50 text-green-700 border-green-200"
-                          : "bg-red-50 text-red-700 border-red-200"
-                        }`}
-                    >
-                      {job.is_open ? "Open" : "Closed"}
-                    </span>
-                  </div>
-
-                  <p className="text-gray-600 line-clamp-2 leading-relaxed">
-                    {job.description?.substring(0, 100)}...
-                  </p>
-                  <p className="text-sm text-gray-500 mt-3 font-medium">
-                    Location: {job.location || "N/A"}
-                  </p>
-
-                  <div className="mt-6 flex gap-3 flex-wrap border-t pt-4 border-gray-100">
-                    {/* Buttons: Added more distinct hover/focus states */}
-                    <button
-                      onClick={() => navigate("/candidates", { state: { jobId: job.id } })}
-                      className="bg-[#C23D3D] px-4 py-2 text-white rounded-lg text-sm font-medium transition duration-150 hover:bg-[#a13131] hover:shadow-md"
-                    >
-                      View Candidates
-                    </button>
-
-                    <button
-                      onClick={() => handleToggleStatus(job.id, job.is_open)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ${job.is_open
-                          ? "bg-gray-200 text-gray-700 hover:bg-gray-200"
-                          : "bg-green-600 text-white hover:bg-green-700"
-                        }`}
-                    >
-                      {job.is_open ? "Close Job" : "Reopen Job"}
-                    </button>
-                    <button
-                      onClick={() => navigate(`/edit-job/${job.id}`)}
-                      className="text-blue-700 px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 hover:bg-blue-50 transition duration-150"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(job.id)}
-                      className="text-red-700 px-4 py-2 rounded-lg text-sm font-medium border border-red-200 hover:bg-red-50 transition duration-150"
-                    >
-                      Delete
-                    </button>
-                  </div>
+              <div
+                key={job.id}
+                // Card Hover is now more pronounced and smooth
+                className="bg-white rounded-xl border border-gray-100 shadow-md transition duration-300 hover:shadow-xl hover:translate-y-[-2px] p-6"
+              >
+                <div className="flex justify-between items-start">
+                  <h3 className="text-lg font-bold text-[#C23D3D]">
+                    {job.title}
+                  </h3>
+                  <span
+                    className={`px-3 py-1 text-xs rounded-full font-semibold border ${job.is_open
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : "bg-red-50 text-red-700 border-red-200"
+                      }`}
+                  >
+                    {job.is_open ? "Open" : "Closed"}
+                  </span>
                 </div>
-              
+
+                <p className="text-gray-600 line-clamp-2 leading-relaxed">
+                  {job.description?.substring(0, 100)}...
+                </p>
+                <p className="text-sm text-gray-500 mt-3 font-medium">
+                  Location: {job.location || "N/A"}
+                </p>
+
+                <div className="mt-6 flex gap-3 flex-wrap border-t pt-4 border-gray-100">
+                  {/* Buttons: Added more distinct hover/focus states */}
+                  <button
+                    onClick={() => navigate("/candidates", { state: { jobId: job.id } })}
+                    className="bg-[#C23D3D] px-4 py-2 text-white rounded-lg text-sm font-medium transition duration-150 hover:bg-[#a13131] hover:shadow-md"
+                  >
+                    View Candidates
+                  </button>
+
+                  <button
+                    onClick={() => handleToggleStatus(job.id, job.is_open)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition
+                        ${job.is_open
+                        ? "bg-gray-400 text-white hover:bg-gray-500"
+                        : "bg-[#6B7280] text-white hover:bg-[#14B8A7]]"
+                      }`}
+                  >
+                    {job.is_open ? "Close Job" : "Reopen Job"}
+                  </button>
+                  <button
+                    onClick={() => navigate(`/edit-job/${job.id}`)}
+                    className="text-blue-700 px-4 py-2 rounded-lg text-sm font-medium border border-blue-200 hover:bg-blue-50 transition duration-150"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(job.id)}
+                    className="text-red-700 px-4 py-2 rounded-lg text-sm font-medium border border-red-200 hover:bg-red-50 transition duration-150"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
             ))}
           </div>
         ) : (
