@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSidebar } from "../components/SidebarContext";
 import logo from "../assets/icon.png";
-import { ChevronLeft, LayoutDashboard, Briefcase, LogOut } from 'lucide-react';
+import { ChevronLeft, LayoutDashboard, Briefcase, LogOut, ListOrdered } from 'lucide-react';
 
 // function to get the appropriate icon
 const getIcon = (name) => {
@@ -9,6 +9,7 @@ const getIcon = (name) => {
         case "Dashboard": return <LayoutDashboard className="w-5 h-5" />;
         case "Create Job": return <Briefcase className="w-5 h-5" />;
         case "Log out": return <LogOut className="w-5 h-5" />;
+        case "Job List": return <ListOrdered className="w-5 h-5" />;
         default: return null;
     }
 };
