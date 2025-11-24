@@ -35,14 +35,14 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+    <div className="min-h-screen flex items-start justify-center bg-gray-50 p-6 pt-20">
       <div className="bg-white p-7 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100">
         {/* Logo + Header */}
         <div className="flex flex-col items-center mb-8">
           <img src={logo} alt="NeuralHire Logo" className="h-14 w-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Admin Login</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Sign in to manage Job Postings
+            Sign in to Manage Job Postings
           </p>
         </div>
 
