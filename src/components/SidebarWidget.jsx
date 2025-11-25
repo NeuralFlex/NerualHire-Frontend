@@ -75,6 +75,7 @@ export default function Sidebar() {
           className="flex items-center h-16 border-b border-gray-300 px-4 cursor-pointer"
           onClick={() => {
             if (isAdmin) {
+              setActiveItem("Dashboard");
               navigate("/dashboard");
             } else {
               window.location.reload();
