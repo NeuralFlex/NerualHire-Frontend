@@ -1,24 +1,16 @@
 import { useNavigate } from "react-router-dom";
-import { useSidebar } from "./SidebarContext"; 
+import { useSidebar } from "./SidebarContext";
+import { Menu, X } from "lucide-react";
 
 const Header = () => {
   const navigate = useNavigate();
-  const role = localStorage.getItem("role");
-  const isAdmin = role === "admin";
 
   const { 
     toggleMobileSidebar, 
     isMobileOpen,
     isExpanded 
   } = useSidebar(); 
-  
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role"); 
-    navigate("/admin");
-  };
 
-  
   const desktopMargin = isExpanded ? "lg:ml-64" : "lg:ml-16";
 
   return (
@@ -42,25 +34,6 @@ const Header = () => {
                 </svg>
             )}
         </button>
-
-        {/* 2. Action Buttons (Pushed to the right) */}
-        <div>
-          {!isAdmin ? ( 
-            <button
-              onClick={() => navigate("/admin")} 
-              className="bg-white text-[#D64948] px-4 py-1.5 rounded-lg font-medium hover:bg-gray-100 transition"
-            >
-              Login
-            </button>
-          ) : ( // If admin, show Logout button
-            <button
-              onClick={handleLogout}
-              className="bg-white text-[#D64948] px-4 py-1.5 rounded-lg font-medium hover:bg-gray-100 transition"
-            >
-              Logout
-            </button>
-          )}
-        </div>
       </div>
     </header>
   );
